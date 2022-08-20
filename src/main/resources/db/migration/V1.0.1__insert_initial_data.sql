@@ -1,11 +1,11 @@
 /**************************/
-/* 初期データ投入用ファイル */
+/* Initial Data File */
 /**************************/
 
-/* ユーザーテーブル */
+/* initial data for users table */
 INSERT INTO users (id) VALUES ('admin');
 
-/* 単語帳テーブル */
+/* initial data for vocabulary table */
 INSERT INTO vocabularies 
 (spelling, meaning, example_en, example_jp)
 VALUES 

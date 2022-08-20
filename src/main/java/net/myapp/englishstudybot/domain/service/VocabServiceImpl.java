@@ -22,5 +22,9 @@ public class VocabServiceImpl implements VocabService {
         return vocabRepository.findAll();
     }
 
+    @Override
+    public VocabEntity addVocab(VocabEntity vocab) {
+        return vocabRepository.add(vocab);
+    }
     
 }

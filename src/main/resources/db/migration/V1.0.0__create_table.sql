@@ -1,5 +1,5 @@
 /**************************/
-/* スキーマ定義ファイル */
+/* Schema File */
 /**************************/
 CREATE TABLE IF NOT EXISTS vocabularies (
     id SERIAL PRIMARY KEY UNIQUE,
