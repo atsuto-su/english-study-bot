@@ -1,11 +1,11 @@
 package net.myapp.englishstudybot.application.contoller;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +18,7 @@ import net.myapp.englishstudybot.domain.service.VocabService;
 
 
 /**
- * VocabRestController provides CRUD function api for vocabularies table.
+ * VocabRestController provides CRUD api for vocabularies table.
  */
 @RestController
 @RequestMapping("/api/vocabs")
@@ -32,9 +32,9 @@ public class VocabRestController {
     }
 
     /**
-     * Lists all records registered in vocabularies table.
+     * Lists all records.
      * 
-     * @return Vocabulary entity
+     * @return a list of all vocabulary records formatted as json as defined in VocabEntity class
      */
     @GetMapping
     public List<VocabEntity> listVocabs() {
@@ -42,22 +42,35 @@ public class VocabRestController {
     }
     
     /**
-     * Adds one vocabulary record into vocabularies table.
+     * Adds one new record.
      * 
-     * @param vocabForm
-     * @return
+     * @param vocabForm a new vocabulary record to be specified in api request body
+     * @return inserted one vocabulary record formatted as json as defined in VocabEntity class
      */
     @PostMapping
     public VocabEntity addVocab(@RequestBody VocabForm vocabForm) {
-        return vocabService.addVocab(vocabForm.toEntity(null, LocalDateTime.now(), LocalDateTime.now()));
+        return vocabService.addVocab(vocabForm.toEntity(null));
     }
 
     /**
+     * Deletes one existing record.
      * 
-     * @param id
+     * @param id the primary key of the record to be deleted
      */
     @DeleteMapping("/{id}")
     public void deleteVocab(@PathVariable Integer id) {
         vocabService.deleteVocab(id);
+    }
+
+    /**
+     * Updates one existing record.
+     * 
+     * @param id the primary key of the record to be updated
+     * @param vocabForm updated vocabulary column values to be specified in api request body
+     * @return an updated vocabulary record formatted as json as defined in VocabEntity class.
+     */
+    @PatchMapping("/{id}")
+    public VocabEntity updateVocab(@PathVariable Integer id, @RequestBody VocabForm vocabForm) {
+        return vocabService.update(vocabForm.toEntity(id));
     }
 }

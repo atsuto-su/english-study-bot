@@ -1,7 +1,5 @@
 package net.myapp.englishstudybot.application.form;
 
-import java.time.LocalDateTime;
-
 import lombok.Data;
 import net.myapp.englishstudybot.domain.model.VocabEntity;
 
@@ -13,7 +11,7 @@ public class VocabForm {
     private String exampleJp;
     private String usersId;
 
-    public VocabEntity toEntity(Integer id, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public VocabEntity toEntity(Integer id) {
         return new VocabEntity(
                 id,
                 this.spelling,
@@ -21,8 +19,8 @@ public class VocabForm {
                 this.exampleEn,
                 this.exampleJp,
                 this.usersId, 
-                createdAt,
-                updatedAt
+                null,
+                null
             );
         
     }

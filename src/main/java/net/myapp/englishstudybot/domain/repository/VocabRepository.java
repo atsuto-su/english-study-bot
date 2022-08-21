@@ -18,30 +18,43 @@ import net.myapp.englishstudybot.domain.model.VocabEntity;
 public interface VocabRepository {
 
    /**
-     * Extracts all vocabularies data from vocabularies table.
+     * Extracts all records.
      * 
-     * @return List of all vocabulary entities
+     * @return a list of all vocabulary records
      */
     public List<VocabEntity> findAll();
 
-    // public VocabEntity findById(int id);
+    /**
+     * Extracts one record by primary key.
+     * 
+     * @param id the primary key of the record to be extracted
+     * @return a vocabulary record found
+     */
+    public VocabEntity findById(Integer id);
+
     // public VocabEntity findBySpelling(String spelling);
     // public VocabEntity findByMeaning(String meaning);
 
     /**
-     * Inserts new record into vocabularies table.
+     * Inserts one new record.
      * 
-     * @param vocab vocabulary entity
-     * @return inserted vocabulary record as entity
+     * @param vocab a new vocabulary record 
+     * @return an inserted vocabulary record
      */
     public VocabEntity add(VocabEntity vocab);
 
     /**
-     * Deletes one record from vocabularies table.
+     * Deletes one existing record.
      * 
-     * @param id ID of the record to be deleted from the table
+     * @param id the primary key of the record to be deleted
      */
     public void delete(Integer id);
 
-    // public VocabEntity update(VocabEntity vocab);
+    /**
+     * Updates one existing record.
+     * 
+     * @param vocab a vocabulary record with updated values
+     * @return an updated vocabulary record
+     */
+    public VocabEntity update(VocabEntity vocab);
 }
