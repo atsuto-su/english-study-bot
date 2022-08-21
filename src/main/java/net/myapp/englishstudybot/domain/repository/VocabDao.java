@@ -1,7 +1,6 @@
 package net.myapp.englishstudybot.domain.repository;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +13,10 @@ import org.springframework.stereotype.Repository;
 
 import net.myapp.englishstudybot.domain.model.VocabEntity;
 
+/**
+ * VocabDao is an implementation of VocabRepository
+ * by using JdbcTemplate.
+ */
 @Repository
 public class VocabDao implements VocabRepository {
 
@@ -52,6 +55,12 @@ public class VocabDao implements VocabRepository {
         Number key = insert.executeAndReturnKey(param);
         vocab.setId(key.intValue());
         return vocab;
+    }
+
+    @Override
+    public void delete(Integer id) {
+        String query = "DELETE FROM vocabularies WHERE id = ?";
+        jdbcTemplate.update(query, id);
     }
 
 } 
