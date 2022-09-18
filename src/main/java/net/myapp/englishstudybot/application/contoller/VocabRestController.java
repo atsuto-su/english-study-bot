@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import net.myapp.englishstudybot.application.form.VocabForm;
 import net.myapp.englishstudybot.domain.model.VocabEntity;
-import net.myapp.englishstudybot.domain.service.VocabService;
+import net.myapp.englishstudybot.domain.service.vocab.VocabService;
 
 
 /**

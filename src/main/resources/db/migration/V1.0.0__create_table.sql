@@ -9,19 +9,25 @@ CREATE TABLE IF NOT EXISTS vocabularies (
     example_jp VARCHAR(50) NOT NULL,
     users_id VARCHAR(40) NOT NULL DEFAULT 'admin',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (spelling, users_id)
 );
 
 CREATE TABLE IF NOT EXISTS users (
     id VARCHAR(40) UNIQUE PRIMARY KEY,
-    self_word_only BOOLEAN DEFAULT FALSE,
+    is_self_word_only BOOLEAN NOT NULL DEFAULT FALSE,
+    is_example_quiz BOOLEAN NOT NULL DEFAULT FALSE,
+    is_answer_jp_quiz BOOLEAN NOT NULL DEFAULT FALSE,
+    is_description_quiz BOOLEAN NOT NULL DEFAULT FALSE,
     quiz_status INT NOT NULL DEFAULT 0,
     last_vocabularies_id INT DEFAULT NULL,
+    last_quiz VARCHAR(50) DEFAULT NULL,
+    last_quiz_answer VARCHAR(50) DEFAULT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS quiz_histories (
+CREATE TABLE IF NOT EXISTS quiz_aggregations (
     vocabularies_id INT,
     users_id VARCHAR(40),
     total_count_question_en INT DEFAULT 0,
@@ -39,9 +45,9 @@ CREATE TABLE IF NOT EXISTS quiz_histories (
 );
 
 ALTER TABLE vocabularies ADD FOREIGN KEY (users_id) REFERENCES users(id);
-ALTER TABLE users ADD FOREIGN KEY (last_vocabularies_id) REFERENCES vocabularies(id);
-ALTER TABLE quiz_histories 
-    ADD FOREIGN KEY (vocabularies_id) REFERENCES vocabularies(id),
-    ADD FOREIGN KEY (users_id) REFERENCES users(id)
+ALTER TABLE users ADD FOREIGN KEY (last_vocabularies_id) REFERENCES vocabularies(id) ON DELETE SET NULL;
+ALTER TABLE quiz_aggregations
+    ADD FOREIGN KEY (vocabularies_id) REFERENCES vocabularies(id) ON DELETE CASCADE,
+    ADD FOREIGN KEY (users_id) REFERENCES users(id) ON DELETE CASCADE
 ;
 
