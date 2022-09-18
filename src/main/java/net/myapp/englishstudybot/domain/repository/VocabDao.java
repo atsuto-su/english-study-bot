@@ -92,6 +92,10 @@ public class VocabDao implements VocabRepository {
     /**
      * Inserts one new record by executing the following SQL:
      * INSERT INTO vocabularies {all columns} VALUES {each specified value};
+     * 
+     * NOTE: 
+     * primary key should be null in the argument
+     * because the key is automatically set by DB.
      */
     @Override
     public VocabEntity add(VocabEntity vocab) {
@@ -99,9 +103,14 @@ public class VocabDao implements VocabRepository {
                                         .withTableName("vocabularies")
                                         .usingGeneratedKeyColumns("id");
         SqlParameterSource param = new BeanPropertySqlParameterSource(vocab);
+
+        // gets the primary key of the inserted record
         Number key = insert.executeAndReturnKey(param);
         vocab.setId(key.intValue());
 
+        // TO BE IMPROVED
+        // could be better using findById method
+        // because the return value is actual record in db
         return vocab;
     }
 
@@ -138,7 +147,10 @@ public class VocabDao implements VocabRepository {
                             vocab.getUpdatedAt(),
                             vocab.getId());
 
-        return vocab;
+        // TO BE IMPROVED
+        // could be better using findById method
+        // because the return value is actual record in db
+         return vocab;
 
     }
 

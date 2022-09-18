@@ -1,4 +1,4 @@
-package net.myapp.englishstudybot.domain.service;
+package net.myapp.englishstudybot.domain.service.vocab;
 
 import java.util.List;
 
