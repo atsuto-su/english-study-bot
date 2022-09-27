@@ -36,6 +36,22 @@ public interface VocabRepository {
     // public VocabEntity findByMeaning(String meaning);
 
     /**
+     * Extracts one record randomly
+     * 
+     * @return a vocabulary record found
+     */
+    public VocabEntity findRandom();
+
+    /**
+     * Extracts some records randomly except for one specified record.
+     * 
+     * @param vocabIdExcluded the primary key of one record excluded from the extracting
+     * @param findNum the number of records to be extracted
+     * @return
+     */
+    public List<VocabEntity> findSomeExceptForOne(int findNum, Integer vocabIdExcluded);
+
+    /**
      * Inserts one new record.
      * 
      * @param vocab a new vocabulary record 
@@ -57,4 +73,6 @@ public interface VocabRepository {
      * @return an updated vocabulary record
      */
     public VocabEntity update(VocabEntity vocab);
+
+
 }

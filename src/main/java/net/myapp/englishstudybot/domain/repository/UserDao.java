@@ -43,7 +43,7 @@ public class UserDao implements UserRepository{
                     (String) extractedItem.get("id"),
                     (Boolean) extractedItem.get("is_self_word_only"),
                     (Boolean) extractedItem.get("is_example_quiz"),
-                    (Boolean) extractedItem.get("is_answer_jp_quiz"),
+                    (Boolean) extractedItem.get("is_jp_question_quiz"),
                     (Boolean) extractedItem.get("is_description_quiz"),
                     (Integer) extractedItem.get("quiz_status"),
                     (Integer) extractedItem.get("last_vocabularies_id"),

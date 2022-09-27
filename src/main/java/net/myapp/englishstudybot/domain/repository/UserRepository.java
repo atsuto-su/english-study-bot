@@ -19,7 +19,7 @@ public interface UserRepository {
 
     /**
      * Inserts one new record.
-     *P 
+     *
      * @param user a new user record
      * @return an inserted user record
      */

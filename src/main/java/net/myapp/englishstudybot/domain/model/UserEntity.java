@@ -11,7 +11,7 @@ public class UserEntity {
    String id;
    Boolean isSelfWordOnly;
    Boolean isExampleQuiz;
-   Boolean isAnswerJpQuiz;
+   Boolean isJpQuestionQuiz;
    Boolean isDescriptionQuiz;
    Integer quizStatus;
    Integer lastVocabulariesId;
@@ -25,7 +25,7 @@ public class UserEntity {
 		this.quizStatus = QuizStateName.WAITING_START.getCode();
       this.isSelfWordOnly = false;
       this.isExampleQuiz = false;
-      this.isAnswerJpQuiz = false;
+      this.isJpQuestionQuiz = false;
       this.isDescriptionQuiz = false;
 	}
 
