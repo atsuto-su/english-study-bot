@@ -1,8 +1,5 @@
 package net.myapp.englishstudybot.application.contoller;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.linecorp.bot.client.LineMessagingClient;
@@ -15,6 +12,7 @@ import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
 
 import lombok.extern.slf4j.Slf4j;
 import net.myapp.englishstudybot.domain.service.bot.LineBotAgent;
+import net.myapp.englishstudybot.domain.service.quiz.QuizService;
 import net.myapp.englishstudybot.domain.service.user.UserService;
 
 /**
@@ -26,11 +24,17 @@ public class QuizBotController {
 
     private final LineMessagingClient lineMessagingClient;
     private final UserService userService;
+    private final QuizService quizService;
 
     @Autowired
-    QuizBotController(LineMessagingClient lineMessagingClient, UserService userService) {
+    QuizBotController(
+        LineMessagingClient lineMessagingClient, 
+        UserService userService,
+        QuizService quizService
+    ) {
         this.lineMessagingClient = lineMessagingClient;
         this.userService = userService;
+        this.quizService = quizService;
     }
     
     @EventMapping
@@ -42,10 +46,8 @@ public class QuizBotController {
         String userId = event.getSource().getUserId();
         String userMessage = event.getMessage().getText();
         LineBotAgent lineBotAgent = new LineBotAgent(lineMessagingClient, replyToken, userId, userMessage);
-        String[] quickreplies = {"A", "B", "C"};
-        List<String> quickReplyItems = Arrays.asList(quickreplies);
-        lineBotAgent.replyMessageWithQuickReply(userMessage, quickReplyItems);
         
+        quizService.provideQuizService(lineBotAgent);
         log.info("EVENT: QuizBotController#handldeTextMessageEvent");
     }
 

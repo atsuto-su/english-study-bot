@@ -15,24 +15,23 @@ import com.linecorp.bot.model.message.quickreply.QuickReply;
 import com.linecorp.bot.model.message.quickreply.QuickReplyItem;
 import com.linecorp.bot.model.response.BotApiResponse;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * LineBotAgent provides LINE Bot functionalities.
- * This class contains necessary information for the bot to reply to a user who sent a message.
+ * This class contains necessary information and functionalities 
+ * for the bot to reply to a user who sent a message.
  * All functionalities relating to LINE bot should be defined in this class.
  */
 @Slf4j
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class LineBotAgent {
 
     private final LineMessagingClient lineMessagingClient;
-    @NonNull
-    private final String replyToken;
+    private String replyToken;
     private final String lineUserId;
     private final String userMessage;
 
@@ -41,7 +40,15 @@ public class LineBotAgent {
     }
 
     /**
-     * Sends reply message to a bot user.
+     * Sets the consumed reply token to null
+     * This method should be called after replying.
+     */
+    public void setReplyTokenNullAfterReply() {
+        this.replyToken = null;
+    }
+
+    /**
+     * Sends a single reply message to a bot user.
      * 
      * @param message a message to be sent
      * @return sending result (true/false)
@@ -52,7 +59,23 @@ public class LineBotAgent {
     }
 
     /**
-     * Sends reply message with quick reply messages to a bot user.
+     * Sends multiple reply messages to a bot user.
+     * 
+     * @param messages a list of multiple messages to be sent
+     * @return sending result (true/false)
+     */
+    public boolean replyMultiMessages(List<String> messages) {
+        List<String> saturatedMessages = messages.stream().map(item -> applyMessageSaturation(item)).toList();
+        // List<Message> message= new ArrayList<Message>(Arrays.asList(new TextMessage("text")));
+        List<Message> messagesList 
+         = new ArrayList<Message>(
+            saturatedMessages.stream().map(item -> new TextMessage(item)).toList()
+         );
+        return reply(messagesList);
+    }
+
+    /**
+     * Sends a single reply message with quick reply messages to a bot user.
      * 
      * @param message a message to be sent
      * @param quickReplyItems quic reply messages sent with a message
