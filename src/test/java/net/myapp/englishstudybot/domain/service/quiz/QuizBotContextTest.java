@@ -3,7 +3,6 @@ package net.myapp.englishstudybot.domain.service.quiz;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -70,10 +69,10 @@ class QuizBotContextTest {
     void setUpEach() {
         MockitoAnnotations.openMocks(this);
 
-        doNothing().when(quizBotWaitingStartState).entryAction(nullable(UserEntity.class), any(LineBotAgent.class));
-        doNothing().when(quizBotWaitingTypeSelectState).entryAction(nullable(UserEntity.class), any(LineBotAgent.class));
-        doNothing().when(quizBotWaitingAnswerState).entryAction(nullable(UserEntity.class), any(LineBotAgent.class));
-        doNothing().when(quizBotCheckingAnswerState).entryAction(nullable(UserEntity.class), any(LineBotAgent.class));
+        doReturn(lineBotAgent).when(quizBotWaitingStartState).entryAction(nullable(UserEntity.class), any(LineBotAgent.class));
+        doReturn(lineBotAgent).when(quizBotWaitingTypeSelectState).entryAction(nullable(UserEntity.class), any(LineBotAgent.class));
+        doReturn(lineBotAgent).when(quizBotWaitingAnswerState).entryAction(nullable(UserEntity.class), any(LineBotAgent.class));
+        doReturn(lineBotAgent).when(quizBotCheckingAnswerState).entryAction(nullable(UserEntity.class), any(LineBotAgent.class));
     }
 
     /* Unit Test */

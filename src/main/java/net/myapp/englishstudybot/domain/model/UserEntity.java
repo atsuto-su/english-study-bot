@@ -8,17 +8,17 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class UserEntity {
-   String id;
-   Boolean isSelfWordOnly;
-   Boolean isExampleQuiz;
-   Boolean isJpQuestionQuiz;
-   Boolean isDescriptionQuiz;
-   Integer quizStatus;
-   Integer lastVocabulariesId;
-   String lastQuizSentence;
-   String lastQuizAnswer;
-   LocalDateTime createdAt;
-   LocalDateTime updatedAt; 
+   private String id;
+   private Boolean isSelfWordOnly;
+   private Boolean isExampleQuiz;
+   private Boolean isJpQuestionQuiz;
+   private Boolean isDescriptionQuiz;
+   private Integer quizStatus;
+   private Integer lastVocabulariesId;
+   private String lastQuizSentence;
+   private String lastQuizAnswer;
+   private LocalDateTime createdAt;
+   private LocalDateTime updatedAt; 
 
 	public UserEntity(String id) {
 		this.id = id;

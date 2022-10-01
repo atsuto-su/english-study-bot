@@ -9,18 +9,18 @@ import lombok.Data;
 @AllArgsConstructor
 public class QuizAggregationEntity {
 
-    Integer vocabulariesId;
-    String usersId;
-    Integer totalCountQuestionEn;
-    Integer totalCountQuestionJp;
-    LocalDateTime lastQuestionDatetimeEn;
-    LocalDateTime lastQuestionDatetimeJp;
-    Integer totalCountCorrectEn;
-    Integer totalCountCorrectJp;
-    Boolean isLastAnswerCorrectEn;
-    Boolean isLastAnswerCorrectJp;
-    Boolean isQuizDisallowed;
-    LocalDateTime createdAt;
-    LocalDateTime updatedAt;
+    private Integer vocabulariesId;
+    private String usersId;
+    private Integer totalCountQuestionEn;
+    private Integer totalCountQuestionJp;
+    private LocalDateTime lastQuestionDatetimeEn;
+    private LocalDateTime lastQuestionDatetimeJp;
+    private Integer totalCountCorrectEn;
+    private Integer totalCountCorrectJp;
+    private Boolean isLastAnswerCorrectEn;
+    private Boolean isLastAnswerCorrectJp;
+    private Boolean isQuizDisallowed;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
 }
