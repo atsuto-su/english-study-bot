@@ -6,10 +6,10 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class UserQuizConfigDto {
-    String targetUserId;
-	Boolean isSelfWordOnly;
-	Boolean isExampleQuiz;
-	Boolean isJpQuestionQuiz;
-	Boolean isDescriptionQuiz;
-    String quizType;
+    private String targetUserId;
+	private Boolean isSelfWordOnly;
+	private Boolean isExampleQuiz;
+	private Boolean isJpQuestionQuiz;
+	private Boolean isDescriptionQuiz;
+    private String quizType;
 }

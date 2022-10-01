@@ -8,10 +8,10 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class QuizDto {
-    Integer targetVocabId;
-    String quizWord;
-    String quizAnswer;
-    List<String> answerCandidates;
-    String quizMessage;
-    String answerMessage;
+    private Integer targetVocabId;
+    private String quizWord;
+    private String quizAnswer;
+    private List<String> answerCandidates;
+    private String quizMessage;
+    private String answerMessage;
 }

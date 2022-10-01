@@ -3,6 +3,7 @@ package net.myapp.englishstudybot.application.contoller;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.linecorp.bot.client.LineMessagingClient;
+import com.linecorp.bot.model.event.Event;
 import com.linecorp.bot.model.event.FollowEvent;
 import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.UnfollowEvent;
@@ -73,6 +74,12 @@ public class QuizBotController {
 
         userService.deleteUser(userId);
         log.info("END: QuizBotController#handldeUnFollowEvent");
+    }
+
+    @EventMapping
+    public void handleOtherEvent(Event event) {
+        log.info("Received message(ignored): {}", event);
+
     }
    
 }
