@@ -2,3 +2,6 @@ id,is_self_word_only,is_example_quiz,is_jp_question_quiz,is_description_quiz,qui
 admin,false,false,false,false,0,null,null,null,2022-08-31 09:00:00,2022-08-31 09:00:00
 testUserA,false,false,false,false,0,null,null,null,2022-09-01 09:00:00,2022-09-01 09:00:00
 testUserB,false,false,false,false,0,null,null,null,2022-09-02 18:00:00,2022-09-02 18:00:00
+testUserA2,false,false,false,false,0,null,null,null,2022-09-02 18:00:00,2022-09-02 18:00:00
+testUserA3,false,false,false,false,0,null,null,null,2022-09-02 18:00:00,2022-09-02 18:00:00
+testUserA4,false,false,false,false,0,null,null,null,2022-09-02 18:00:00,2022-09-02 18:00:00

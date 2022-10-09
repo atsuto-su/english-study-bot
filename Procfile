@@ -1,1 +1,1 @@
-web: java $JAVA_OPTS -jar target/english-study-bot-0.0.1-SNAPSHOT.jar --server.port=$PORT
+web: java $JAVA_OPTS -jar target/english-study-bot-1.0.0.jar --server.port=$PORT

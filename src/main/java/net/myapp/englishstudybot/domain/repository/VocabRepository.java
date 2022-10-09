@@ -25,15 +25,19 @@ public interface VocabRepository {
     public List<VocabEntity> findAll();
 
     /**
+     * Extracts IDs of all records.
+     * 
+     * @return a list of primary keyes of all records
+     */
+    public List<Integer> findAllIds();
+
+    /**
      * Extracts one record by primary key.
      * 
      * @param id the primary key of the record to be extracted
      * @return a vocabulary record found
      */
     public VocabEntity findById(Integer id);
-
-    // public VocabEntity findBySpelling(String spelling);
-    // public VocabEntity findByMeaning(String meaning);
 
     /**
      * Extracts one record randomly
