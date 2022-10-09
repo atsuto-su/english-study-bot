@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>net.myapp</groupId>
 	<artifactId>english-study-bot</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>english-study-bot</name>
 	<description>English study bot project for Spring Boot</description>
 	<properties>
