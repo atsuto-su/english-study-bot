@@ -166,6 +166,7 @@ public class BotMessageGenerator {
         List<String> allAnswerCandidates
          = answerCandidates.stream().collect(Collectors.toList());
 
+        // TO BE IMPROVED: Random should be replaced with RandomNumberGenerator class.
         Random rnd = new Random();
         int insertIndex = rnd.nextInt(allAnswerCandidates.size()+1);
         // the correct answer is inserted into the list at a random index

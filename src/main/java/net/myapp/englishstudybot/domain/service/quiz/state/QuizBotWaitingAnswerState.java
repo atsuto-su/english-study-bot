@@ -169,21 +169,23 @@ public class QuizBotWaitingAnswerState implements QuizBotState {
          = quizAggregationRepository.findById(user.getLastVocabulariesId(), user.getId());
         if (record == null) {
             //if the quiz aggregation is not found, adds a new record.
-            LocalDateTime lastQuestionDatetimeEn;
-            LocalDateTime lastQuestionDatetimeJp;
+            Integer totalCountQuestionEn = 0;
+            Integer totalCountQuestionJp = 0;
+            LocalDateTime lastQuestionDatetimeEn = null;
+            LocalDateTime lastQuestionDatetimeJp = null;
             if (isJpQuestionQuiz) {
-                lastQuestionDatetimeEn = null; 
+                totalCountQuestionJp++;
                 lastQuestionDatetimeJp = LocalDateTime.now();
             } else {
+                totalCountQuestionEn++;
                 lastQuestionDatetimeEn = LocalDateTime.now();
-                lastQuestionDatetimeJp = null;
             }
             QuizAggregationEntity quizAggregation
              = new QuizAggregationEntity(
                 user.getLastVocabulariesId(), 
                 user.getId(), 
-                0, 
-                0, 
+                totalCountQuestionEn, 
+                totalCountQuestionJp, 
                 lastQuestionDatetimeEn, 
                 lastQuestionDatetimeJp, 
                 0, 

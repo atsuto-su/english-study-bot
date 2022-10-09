@@ -5,7 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -58,6 +60,19 @@ class VocabDaoTest {
         MockedStatic<LocalDateTime> mock 
         = Mockito.mockStatic(LocalDateTime.class, Mockito.CALLS_REAL_METHODS);
         mock.when(LocalDateTime::now).thenReturn(testCurrentTime);
+    }
+
+    @Test
+    @DisplayName("すべての英単語のIDを取得")
+    void findAllIds() {
+        List<Integer> expected
+         = Arrays.stream(
+                    IntStream.rangeClosed(1,10).toArray()
+            ).boxed().toList();
+
+        List<Integer> actual = vocabDao.findAllIds();
+
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test

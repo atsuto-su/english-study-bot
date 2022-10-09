@@ -10,8 +10,8 @@ import static org.mockito.Mockito.verify;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.random.RandomGenerator;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import net.myapp.englishstudybot.domain.model.VocabEntity;
 import net.myapp.englishstudybot.domain.model.quiz.QuizDto;
 import net.myapp.englishstudybot.domain.model.quiz.UserQuizConfigDto;
-import net.myapp.englishstudybot.domain.repository.VocabDao;
+import net.myapp.englishstudybot.domain.repository.QuizAggregationRepository;
+import net.myapp.englishstudybot.domain.repository.VocabRepository;
 
 @SpringBootTest
 public class QuizGeneratorTest {
@@ -64,29 +65,36 @@ public class QuizGeneratorTest {
     private QuizGenerator quizGenerator;
 
     @MockBean
-    private VocabDao vocabDao;
+    private RandomGenerator testRnd;
 
+    @MockBean
+    private VocabRepository vocabRepository;
+
+    @MockBean
+    private QuizAggregationRepository quizAggregationRepository;
     
-    @BeforeEach
-    void setUpEach() {
-        doReturn(vocab).when(vocabDao).findRandom();
-        doReturn(vocabCandidates).when(vocabDao).findSomeExceptForOne(anyInt(), anyInt());
+    // setup method for Random Quiz testing
+    private void setUpForRandom() {
+        doReturn(vocab).when(vocabRepository).findRandom();
+        doReturn(vocabCandidates).when(vocabRepository).findSomeExceptForOne(anyInt(), anyInt());
     }
-
-    // *** Test for Random Quiz *** //
-
+    
+    // *** Need to test here every time a new quiz type is added *** //
     @Test
     @DisplayName("選択可能なクイズのタイプが正しく取得できるか検証")
     void getSelectableQuizTypes() {
-        List<String> expected = Arrays.asList("ランダム");
+        List<String> expected
+         = Arrays.asList("ランダム", "出題日古い", "正答率低い", "誤答");
         List<String> actual = quizGenerator.getSelectableQuizTypes();
         assertThat(actual).isEqualTo(expected);
     }
 
+    // *** Test for Random Quiz *** //
     @Test
     @DisplayName("生成されるクイズDTOが正しいか検証（ランダム-英訳-記述式の問題）")
     void generateQuizRandomJpQuizDescriptionCase() {
         //Arrange
+        setUpForRandom();
         userQuizConfigDto.setQuizType("ランダム");
         userQuizConfigDto.setIsJpQuestionQuiz(true);
         userQuizConfigDto.setIsDescriptionQuiz(true);
@@ -99,7 +107,7 @@ public class QuizGeneratorTest {
 
         //Assert
         assertThat(quizDtoActual).usingRecursiveComparison().isEqualTo(quizDtoExpected);
-        verify(vocabDao, times(1)).findRandom();
+        verify(vocabRepository, times(1)).findRandom();
 
     }
 
@@ -107,6 +115,7 @@ public class QuizGeneratorTest {
     @DisplayName("生成されるクイズDTOが正しいか検証（ランダム-英訳-選択式の問題）")
     void generateQuizRandomJpQuizSelectionCase() {
         //Arrange
+        setUpForRandom();
         userQuizConfigDto.setQuizType("ランダム");
         userQuizConfigDto.setIsJpQuestionQuiz(true);
         userQuizConfigDto.setIsDescriptionQuiz(false);
@@ -122,8 +131,8 @@ public class QuizGeneratorTest {
 
         //Assert
         assertThat(quizDtoActual).usingRecursiveComparison().isEqualTo(quizDtoExpected);
-        verify(vocabDao, times(1)).findRandom();
-        verify(vocabDao, times(1)).findSomeExceptForOne(
+        verify(vocabRepository, times(1)).findRandom();
+        verify(vocabRepository, times(1)).findSomeExceptForOne(
                                         vocabCandidates.size(), 
                                         vocab.getId()
                                     );
@@ -134,6 +143,7 @@ public class QuizGeneratorTest {
     @DisplayName("生成されるクイズDTOが正しいか検証（ランダム-和訳-記述式の問題）")
     void generateQuizRandomEnQuizDescriptionCase() {
         //Arrange
+        setUpForRandom();
         userQuizConfigDto.setQuizType("ランダム");
         userQuizConfigDto.setIsJpQuestionQuiz(false);
         userQuizConfigDto.setIsDescriptionQuiz(true);
@@ -145,13 +155,14 @@ public class QuizGeneratorTest {
 
         //Assert
         assertThat(quizDtoActual).usingRecursiveComparison().isEqualTo(quizDtoExpected);
-        verify(vocabDao, times(1)).findRandom();
+        verify(vocabRepository, times(1)).findRandom();
     }
 
     @Test
     @DisplayName("生成されるクイズDTOが正しいか検証（ランダム-和訳-選択式の問題）")
     void generateQuizRandomEnQuizSelectionCase() {
         //Arrange
+        setUpForRandom();
         userQuizConfigDto.setQuizType("ランダム");
         userQuizConfigDto.setIsJpQuestionQuiz(false);
         userQuizConfigDto.setIsDescriptionQuiz(false);
@@ -167,13 +178,17 @@ public class QuizGeneratorTest {
 
         //Assert
         assertThat(quizDtoActual).usingRecursiveComparison().isEqualTo(quizDtoExpected);
-        verify(vocabDao, times(1)).findRandom();
-        verify(vocabDao, times(1)).findSomeExceptForOne(
+        verify(vocabRepository, times(1)).findRandom();
+        verify(vocabRepository, times(1)).findSomeExceptForOne(
                                         vocabCandidates.size(), 
                                         vocab.getId()
                                     );
 
     }
+
+    // Note that tests for other quiz types are covereed by integration tests rather than unit tests
+    // since unit tests are not effective to validate logics in those methods.
+
 
     // *** Test for non-defined Quiz *** //
     @Test

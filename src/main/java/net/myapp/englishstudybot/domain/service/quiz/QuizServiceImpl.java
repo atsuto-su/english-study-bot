@@ -33,6 +33,13 @@ public class QuizServiceImpl implements QuizService{
         log.info("START: QuizServiceImpl#provideQuizService");
 
         UserEntity user = userRepository.findById(lineBotAgent.getLineUserId());
+        if (user == null) {
+            // add a new user in case the user followed during the service suspension.
+            log.info("Add a new user data because no record detected.");
+            user = new UserEntity(lineBotAgent.getLineUserId());
+            user.setQuizStatus(QuizStateName.WAITING_START.getCode());
+            user = userRepository.add(user);
+        }
         quizBotContext.setState(QuizStateName.nameOf(user.getQuizStatus()));
         quizBotContext.triggerStateMove(user, lineBotAgent);
 

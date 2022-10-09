@@ -73,6 +73,24 @@ public class VocabDao implements VocabRepository {
     }
 
     /**
+     * Extracts all vocabulary IDs by the following SQL:
+     * SELECT id FROM vocabularies;
+     */
+    @Override
+    public List<Integer> findAllIds() {
+        log.info("START: VocabDao#findAllIds");
+
+        String query = "SELECT id FROM vocabularies";
+        List<Map<String, Object>> extractedItem = jdbcTemplate.queryForList(query);
+        List<Integer> vocabularyIds
+         = extractedItem.stream()
+            .map( item -> (Integer) item.get("id")).toList();
+
+        log.info("END: VocabDao#findAllIds");
+        return vocabularyIds;
+    }
+
+    /**
      * Extracts one record by executing the following SQL:
      * SELECT * FROM vocabularies WHERE id = {specified id};
      */
