@@ -2,6 +2,7 @@ package net.myapp.englishstudybot.domain.repository;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Repository;
 
 import lombok.extern.slf4j.Slf4j;
 import net.myapp.englishstudybot.domain.model.QuizAggregationEntity;
+import net.myapp.englishstudybot.domain.model.quiz.QuizAnswerRatioDto;
 
 /**
  * QuizAggregationDao is an implementation of QuizAggregationRepository by using JdbcTemplate.
@@ -51,6 +53,7 @@ public class QuizAggregationDao implements QuizAggregationRepository {
      * Extracts one record by executing the following SQL:
      * SELECT * FROM quiz_aggregations 
      *  WHERE vocabularies_id = {specified id} AND users_id = {specified id};
+     * When no data are found, return null.
      */
     @Override
     public QuizAggregationEntity findById(Integer vocabulariesId, String usersId) {
@@ -92,6 +95,195 @@ public class QuizAggregationDao implements QuizAggregationRepository {
 
         log.info("END: QuizAggregationDao#findById");
         return quizAggregation;
+    }
+
+    /**
+     * Extracts all vocabulary IDS for a specified user by the following SQL:
+     *  SELECT id FROM quiz_aggregations WHERE users_id = {specified id};
+     * When no data which satisfy the cnodition are found, return an empty list. 
+     */
+    @Override
+    public List<Integer> findAllVocabIdsForOneUser(String userId) {
+        log.info("START: QuizAggregationDao#findAllVocabIdsByUser");
+
+        String query
+         = String.format(
+            "SELECT %s FROM %s WHERE %s = ?",
+            COL_NAME_VOCABULARIES_ID, TABLE_NAME, COL_NAME_USERS_ID
+        );
+
+        List<Integer> vocabularyIds;
+        try {
+            List<Map<String, Object>> extractedList
+             = jdbcTemplate.queryForList(query, userId);
+            vocabularyIds = extractedList.stream()
+                .map(item -> (Integer) item.get(COL_NAME_VOCABULARIES_ID)).toList();
+        } catch (EmptyResultDataAccessException e) {
+            vocabularyIds = List.of();
+        }
+
+        log.info("END: QuizAggregationDao#findAllVocabIdsByUser");
+        return vocabularyIds;
+
+    }
+
+    /**
+     * Extracts one vocabulary ID for a specified user
+     * where the column last_question_date_time_(en|jp) is oldest.
+     * by executing the following SQL:
+     *  SELECT vocabularies_id FROM quiz_aggregations
+     *  WHERE users_id = {specified ID} AND last_question_datetime_(en|jp) = 
+     *   (SELECT MIN(last_question_datetime_(en|jp)) FROM quiz_aggregations)
+     *  LIMIT 1
+     * When no data which satisfy the condition are found, returns an empty list. 
+     */
+    @Override
+    public Integer findLeastRecentGivenVocab(String userId, Boolean isJpQuestionQuiz) {
+        log.info("START: QuizAggregationDao#findLeastRecentGivenVocab");
+
+        String targetColumnSuffix;
+        if (isJpQuestionQuiz) {
+            targetColumnSuffix = "jp";
+        } else {
+            targetColumnSuffix = "en";
+        }
+        String targetColumnName = "last_question_datetime_" + targetColumnSuffix;
+        String query
+         = String.format(
+            """
+                SELECT %1$s FROM %2$s WHERE %3$s = ? AND %4$s = 
+                    (SELECT MIN(%4$s) FROM %2$s WHERE %3$s = ?) 
+                LIMIT 1
+            """,
+            COL_NAME_VOCABULARIES_ID, TABLE_NAME,
+            COL_NAME_USERS_ID, targetColumnName
+        );
+
+        Integer leastRecentvocabularyId;
+        try {
+            leastRecentvocabularyId 
+             = (Integer) jdbcTemplate.queryForMap(query, userId, userId)
+                .get(COL_NAME_VOCABULARIES_ID);
+        } catch (EmptyResultDataAccessException e) {
+            leastRecentvocabularyId = null;
+        }
+
+        log.info("END: QuizAggregationDao#findLeastRecentGivenVocab");
+        return leastRecentvocabularyId;
+
+    }
+    
+    /**
+     * Extracts all vocabularies IDs and calculated quiz incorrection ratio
+     * ordered by the quiz incorrection ratio for a specified user.
+     * by executing the following SQL:
+     *  SELECT 
+     *      vocabularies_id, 
+     *      CAST( COALSESCE(
+     *          CAST(total_count_correct_(en|jp)*100 AS NUMERIC) / 
+     *          NULLIF(total_count_question_(en|jp) ,0) , 0
+     *          ) AS NUMERIC(5,2)
+     *      ) AS ratio 
+     *  FROM quiz_aggregations 
+     *  WHERE users_id = {specified ID} 
+     *  ORDER BY ratio ASC;
+     * 
+     * When total_count_question_(en|jp) is 0, the ratio returns 0 for the row.
+     * When no data are found for the user, returns an empty list. 
+     */
+    @Override
+    public List<QuizAnswerRatioDto> extractOrderedByIncorrectionRatio(
+        String userId, Boolean isJpQuestionQuiz
+    ) {
+        log.info("START: QuizAggregationDao#extractOrderedByIncorrectionRatio");
+
+        String targetColumnSuffix;
+        if (isJpQuestionQuiz) {
+            targetColumnSuffix = "jp";
+        } else {
+            targetColumnSuffix = "en";
+        }
+        final String COL_NAME_RATIO = "ratio";
+        String query = String.format(
+            """
+                SELECT %1$s, 
+                    CAST( 
+                        COALESCE(
+                            CAST(total_count_correct_%2$s * 100 AS NUMERIC) / 
+                                NULLIF(total_count_question_%2$s, 0)
+                            , 0
+                        ) AS DOUBLE PRECISION
+                    ) AS %3$s from %4$s 
+                WHERE %5$s = ?
+                ORDER BY %3$s ASC;
+            """,
+            COL_NAME_VOCABULARIES_ID, targetColumnSuffix,
+            COL_NAME_RATIO, TABLE_NAME, COL_NAME_USERS_ID
+        );
+
+        List<QuizAnswerRatioDto> correctionRecordsList;
+        try {
+            List<Map<String, Object>> records = jdbcTemplate.queryForList(query, userId);
+            correctionRecordsList 
+             = records.stream()
+                .map( item -> new QuizAnswerRatioDto(
+                                (Integer) item.get(COL_NAME_VOCABULARIES_ID),
+                                (Double) item.get(COL_NAME_RATIO)
+                            )
+                ).toList();
+        } catch (EmptyResultDataAccessException e) {
+            correctionRecordsList = List.of();
+        }
+
+        log.info("END: QuizAggregationDao#extractOrderedByIncorrectionRatio");
+        return correctionRecordsList;
+
+    }
+
+    /**
+     * Extracts all vocabularies IDs for a user
+     * where the column is_last_answer_correct_(en|jp) is false
+     * by executing the following SQL: 
+     *  SELECT vocabularies_id FROM quiz_aggregations
+     *  WHERE user_id = {specified ID} AND is_last_correct_(en|jp) = false
+     * When no data which satisfy the condition are found, returns an empty list. 
+     */
+    @Override
+    public List<Integer> findLastIncorrectVocabs(
+        String userId, Boolean isJpQuestionQuiz
+    ) {
+        log.info("START: QuizAggregationDao#extractLastIncorrectQuiz");
+
+        String targetColumnSuffix;
+        if (isJpQuestionQuiz) {
+            targetColumnSuffix = "jp";
+        } else {
+            targetColumnSuffix = "en";
+        }
+        String query = String.format(
+            """
+                SELECT %1$s FROM %2$s
+                WHERE %3$s = ? AND is_last_answer_correct_%4$s = false
+                    
+            """,
+                COL_NAME_VOCABULARIES_ID, TABLE_NAME,
+                COL_NAME_USERS_ID, targetColumnSuffix
+        );
+
+        List<Integer> vocabularyIds;
+        try {
+            List<Map<String, Object>> extractedItems
+             = jdbcTemplate.queryForList(query, userId);
+            vocabularyIds
+             = extractedItems.stream()
+                .map( item -> (Integer) item.get(COL_NAME_VOCABULARIES_ID))
+                .toList();
+        } catch (EmptyResultDataAccessException e) {
+            vocabularyIds = List.of();
+        }
+
+        log.info("END: QuizAggregationDao#extractLastIncorrectQuiz");
+        return vocabularyIds;
     }
 
     /**

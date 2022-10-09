@@ -32,7 +32,7 @@ class BotMessageGeneratorTest {
     void getWelComeMessage() {
 
         //Arrange
-        String expected = "友だち登録ありがとう！\nEnglish Study Botでは、チャット形式で英単語クイズを出題して英語学習をサポートするよ。\nさっそく「クイズ」と送信してクイズを始めよう！";
+        String expected = "友だち登録ありがとう！\n英語学習クイズボットでは、チャット形式で英単語クイズを出題して英語学習をサポートするよ。\nさっそく「クイズ」と送信してクイズを始めよう！";
 
         //Act
         String actual = botMessageGenerator.getWelcomeMessage();

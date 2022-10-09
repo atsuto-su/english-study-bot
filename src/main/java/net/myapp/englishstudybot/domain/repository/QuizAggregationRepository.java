@@ -1,6 +1,9 @@
 package net.myapp.englishstudybot.domain.repository;
 
+import java.util.List;
+
 import net.myapp.englishstudybot.domain.model.QuizAggregationEntity;
+import net.myapp.englishstudybot.domain.model.quiz.QuizAnswerRatioDto;
 
 /**
  * QuizAggregationRepository is a repostory interface which provides CRUD methods 
@@ -16,6 +19,54 @@ public interface QuizAggregationRepository {
      * @return a quiz aggregation record found
      */
     public QuizAggregationEntity findById(Integer vocabulariesId, String usersId);
+
+    /**
+     * Extracts all vocabulary IDs for a specified user.
+     * 
+     * @param userId ID of the user to be extracted
+     * @return a list of all vocabularies IDs registered for the user
+     */
+    public List<Integer> findAllVocabIdsForOneUser(String userId);
+
+    /**
+     * Extracts one vocabulary ID for a specified user
+     * where the column last_question_date_time_(en|jp) is oldest.
+     * Which column "_jp" or "_en" becomes target depends on an argument of isJpQuestionQuiz.
+     * When the boolean is true, "_jp" columns will be the target.
+     * 
+     * @param userId ID of the target user 
+     * @param isJpQuestionQuiz a flag to configure which type of question, "_jp" or "_en" is target 
+     * @return a vocabulary ID which satisfies the condition.
+     */
+    public Integer findLeastRecentGivenVocab(String userId, Boolean isJpQuestionQuiz);
+
+    /**
+     * Extracts all vocabularies IDs and calculated quiz incorrection ratio
+     * ordered by the quiz incorrection ratio for a specified user.
+     * Which column "_jp" or "_en" becomes target depends on an argument of isJpQuestionQuiz.
+     * When the boolean is true, "_jp" columns will be the target.
+      * 
+     * @param userId ID of the target user
+     * @param isJpQuestionQuiz a flag to configure which type of question, "_jp" or "_en" is target
+     * @return a list of maps composed of vocabularies ID and incorrection ratio.
+     */
+    public List<QuizAnswerRatioDto> extractOrderedByIncorrectionRatio(
+        String userId, Boolean isJpQuestionQuiz
+    );
+
+    /**
+     * Extracts all vocabularies IDs for a user
+     * where the column is_last_answer_correct_(en|jp) is false
+     * Which column "_jp" or "_en" becomes target depends on an argument of isJpQuestionQuiz.
+     * When the boolean is true, "_jp" columns will be the target.
+      * 
+     * @param userId ID of the target user
+     * @param isJpQuestionQuiz a flag to configure which type of question, "_jp" or "_en" is target
+     * @return a list of vocabularies IDs which satisfy the condition
+     */
+    public List<Integer> findLastIncorrectVocabs(
+        String userId, Boolean isJpQuestionQuiz
+    );
 
     /**
      * Inserts one new record.
