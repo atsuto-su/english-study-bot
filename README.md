@@ -1,8 +1,11 @@
-# English Study Bot
-英単語学習ができるLINE Botです。<br>
-対話形式でBotが英単語のクイズを出題します。<br>
-クイズの回答結果はDBにデータとして蓄積され、データを利用した様々な種類のクイズ出題機能に活用されます（機能開発中）。<br>
-例えば、過去に出題したクイズの中で正答率が低い英単語を優先してクイズ出題する機能を実装予定です。<br>
+# 英語学習クイズボット
+英単語学習ができるLINE Botです。対話形式でBotが英単語のクイズを出題します。<br>
+クイズの回答結果はDBにユーザー毎のデータとして蓄積され、データを利用した様々な種類のクイズ出題機能に活用されます。<br>
+現在、下記のクイズ出題機能があります。
+- ランダム：DBに登録されている英単語の中からランダムに出題
+- 出題日古い：ユーザーへのクイズ出題日が最も古い英単語を出題
+- 正答率低い：ユーザーのクイズ正答率が最も低い英単語を出題
+- 誤答：ユーザーの最後の回答結果が不正解だった英単語を出題
 
 # 利用手順および動作概要
 ※前提として、ユーザーはLINE利用者とします。<br>
@@ -11,21 +14,19 @@
 
 1. 下記QRコードからLINE友だち追加します。<br>
 <img src="https://user-images.githubusercontent.com/67531867/192816284-1dc89b58-1e4b-4eff-b047-c6f0bf2453a8.png" width="100pt"><br>
-追加すると、下図のメッセージを受信します。<br>
-<img src="https://user-images.githubusercontent.com/67531867/193288499-ce218efb-7e64-498c-af77-fc1cdea3e1e1.png" width="300pt"><br>
 2. クイズ開始<br>
 「クイズ」と送信して、クイズを開始します。<br>
-<img src="https://user-images.githubusercontent.com/67531867/193288545-bca09c8c-d41e-4b11-8c9e-8eb7cf4b6d77.png" width="300pt"><br>
+<img src="https://user-images.githubusercontent.com/67531867/194766469-034f6101-0c9f-4aa1-bdfe-927d48d104f2.png" width="300pt"><br>
 3. クイズ種類選択<br>
 LINEのクイックリプライ機能で選択可能なクイズ種類の候補が表示されるので、実施したい種類を一つ選択します。<br>
-<img src="https://user-images.githubusercontent.com/67531867/193288557-85ace86d-9e05-456a-9767-55af7284b73e.png" width="300pt"><br>
+<img src="https://user-images.githubusercontent.com/67531867/194765106-383986da-5458-4450-8c96-a20c7228c9ee.png" width="300pt"><br>
 4. クイズ回答<br>
 選択した種類に応じたクイズが出題されるので、回答を考えます。<br>
 LINEのクイックリプライ機能で回答の選択肢が表示されるので、回答を選んで送信します。<br>
 <img src="https://user-images.githubusercontent.com/67531867/193288568-7809df63-7ab7-4351-aaa7-96307adcde1c.png" width="300pt"><br>
 5. 回答の正誤結果確認<br>
 回答の正誤結果を受信します。不正解の場合は回答も受信します。<br>
-以降、再び手順2に戻り、繰り返しクイズにチャレンジすることができます。<br>
+以降は手順2に戻って繰り返すことで、クイズに繰り返しチャレンジすることができます。<br>
 <img src="https://user-images.githubusercontent.com/67531867/193288578-6906eb8a-da69-4223-96fc-2df50116a53d.png" width="300pt"> <img src="https://user-images.githubusercontent.com/67531867/193288584-35ea7bd1-1e2d-4e98-9487-277b60ce8c5c.png" width="300pt">
 
 # 使用技術
@@ -42,12 +43,18 @@ LINEのクイックリプライ機能で回答の選択肢が表示されるの�
 - [状態遷移表](https://docs.google.com/spreadsheets/d/1xOJkhCtDV8zBJaq84Ska6b09Db5TRBig9HtAwPBc5QQ/edit?usp=sharing)
 - [クラス図](https://drive.google.com/file/d/15kdYtEb76mrBM9kD3BoaZk0uVWJTJEKs/view?usp=sharing)
 
-# こだわりポイント/苦労した点
+# 工夫した点/苦労した点
 ### 工夫した点
-- botの状態遷移処理の実装箇所（domain/service/state以下）。<br>
-今後の機能追加予定に備えて、保守性を考慮した実装としました。<br>
-具体的には、Stateパターンを参考にした処理を実装することで、新しい状態を追加する場合でも<br>
-既存のコードへの影響を抑制するコーディングができたと考えています。
+- botの状態遷移処理で保守性と可読性を考慮した実装<br>
+Stateパターンを参考にしてContextクラスと各Stateクラスを用意して各状態の処理を独立化しました。<br>
+これにより、新しい状態を追加する場合でも既存のコードへの影響を抑制できると考えています。<br>
+さらに、状態毎にクラスが分かれているため、ソースの可読性を向上できたと考えています。<br>
+該当箇所のソースはこちら（[Contextクラス](src/main/java/net/myapp/englishstudybot/domain/service/quiz/QuizBotContext.java)と[各Stateクラス](src/main/java/net/myapp/englishstudybot/domain/service/quiz/state)）。
+- クイズ出題機能の変更容易さを考慮したクラス設計<br>
+クイズ出題機能（ランダム、出題日古い等）のロジック実装は一つのクラスに集約化しました。<br>
+これにより、今後クイズ機能ロジックの追加/変更/削除が生じた際の改修範囲を抑制できるため、<br>
+変更が比較的容易な実装ができたと考えています。<br>
+該当箇所のソースは[こちら](/src/main/java/net/myapp/englishstudybot/domain/service/quiz/QuizGenerator.java)。
 
 ### 苦労した点
 開発の業務経験がない上にJavaでのコーディングも初めてだったため、<br>
@@ -97,9 +104,8 @@ LINEのクイックリプライ機能で回答の選択肢が表示されるの�
 
 # 今後の改善方針
 ## 機能面
-- クイズ種類の追加
-- クイズ出題形式のユーザー自身のカスタマイズ機能<br>（出題単語から意味を答えるクイズと出題された意味を持つ単語を答えるクイズの切り替え、選択肢あり/なしのクイズの切り替え等）
-- ユーザー自身で英単語を登録する機能の追加（自身が苦手な単語に特化したクイズを出題させる機能の追加）
+- クイズ出題形式のユーザーカスタマイズ機能の追加<br>（出題単語から意味を答えるクイズと出題された意味を持つ単語を答えるクイズの切り替え、選択肢あり/なしのクイズの切り替え等）
+- ユーザー自身で英単語を登録する機能の追加。これにより、自身が苦手な単語に特化したクイズを出題可能にする。
 
 ## 実装面
 - 異常系の設計・実装
