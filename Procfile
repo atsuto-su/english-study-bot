@@ -1,1 +1,0 @@
-web: java $JAVA_OPTS -jar target/english-study-bot-1.0.0.jar --server.port=$PORT

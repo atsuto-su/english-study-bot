@@ -1,0 +1,23 @@
+# DataSource
+spring.datasource:
+  driver-class-name: org.postgresql.Driver
+  url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${POSTGRES_DB}
+  username: ${POSTGRES_USER}
+  password: ${POSTGRES_PASSWORD}
+
+# LINE Bot config
+line.bot:
+  channel-token: ${LINE_TOKEN}
+  channel-secret: ${LINE_SECRET}
+  handler.path: /callback
+
+# Devtools
+spring.devtools:
+  remote.restart.enabled: true
+  livereload.enabled: true
+
+# Messages
+spring.messages.basename: messages/messages
+
+# Logs
+logging.file.path: logs
