@@ -3,7 +3,6 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-application.yml
 logs/
 
 ### STS ###
@@ -33,3 +32,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### docker ###
+.env
