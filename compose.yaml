@@ -12,13 +12,13 @@ services:
       - POSTGRES_PASSWORD
       - LINE_TOKEN
       - LINE_SECRET
+      - CORS_ALLOW_ORIGIN
     networks:
       - spring-postgres
 
   db:
     image: postgres:14.5
     platform: linux/arm64/v8
-    restart: always
     volumes:
       - db-data:/var/lib/postgresql/data
     networks:
