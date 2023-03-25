@@ -5,8 +5,10 @@ import java.util.List;
 import net.myapp.englishstudybot.domain.model.VocabEntity;
 
 /**
- * VocabService is a service interface which provides CRUD methods for vocabularies table.
- * The purpose of this interface is to mediate between VocabRestController and VocabRepository.
+ * VocabService is a service interface which provides CRUD methods for
+ * vocabularies table.
+ * The purpose of this interface is to mediate between VocabRestController and
+ * VocabRepository.
  * Therefore, ths interface should be implemented by using repository class.
  */
 public interface VocabService {
@@ -19,9 +21,17 @@ public interface VocabService {
     public List<VocabEntity> getAllVocabs();
 
     /**
+     * Provides reading operation to extract one record.
+     * 
+     * @param id the primary key of the record to be extracted
+     * @return a vocabulary record
+     */
+    public VocabEntity getOneVocabById(Integer id);
+
+    /**
      * Provides creating operation to insert one new record.
      * 
-     * @param vocab a new vocabulary record 
+     * @param vocab a new vocabulary record
      * @return an inserted vocabulary record
      */
     public VocabEntity addVocab(VocabEntity vocab);

@@ -44,6 +44,18 @@ public class VocabRestController {
     }
 
     /**
+     * List one records found by ID.
+     * 
+     * @param id the primary key of the record to be extracted
+     * @return a vocabulary record formatted as json as defined in
+     *         VocabEntity class
+     */
+    @GetMapping("/{id}")
+    public VocabEntity listOneVocab(@PathVariable Integer id) {
+        return vocabService.getOneVocabById(id);
+    }
+
+    /**
      * Adds one new record.
      * 
      * @param vocabForm a new vocabulary record to be specified in api request body

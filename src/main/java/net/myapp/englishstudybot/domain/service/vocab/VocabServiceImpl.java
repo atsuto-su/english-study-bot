@@ -14,7 +14,7 @@ import net.myapp.englishstudybot.domain.repository.VocabRepository;
  * and uses CRUD methods defined in VocabRepository intefaces.
  * 
  * NOTE:
- * Non-specified argument values for CU operation should be supplemented here, 
+ * Non-specified argument values for CU operation should be supplemented here,
  * not in controller class (e.g. createdAt, updatedAt, etc.).
  * 
  */
@@ -36,6 +36,14 @@ public class VocabServiceImpl implements VocabService {
     }
 
     /**
+     * Uses a reading method to extract all vocabularies data.
+     */
+    @Override
+    public VocabEntity getOneVocabById(Integer id) {
+        return vocabRepository.findById(id);
+    }
+
+    /**
      * Uses a creating method to insert one new record.
      * Non-specified argument values are assigned here as follows:
      * - exampleEn: empty
@@ -44,9 +52,12 @@ public class VocabServiceImpl implements VocabService {
      */
     @Override
     public VocabEntity addVocab(VocabEntity vocab) {
-        if (vocab.getExampleEn() == null ) vocab.setExampleEn("");
-        if (vocab.getExampleJp() == null ) vocab.setExampleJp("");
-        if (vocab.getUsersId() == null) vocab.setUsersId("admin");
+        if (vocab.getExampleEn() == null)
+            vocab.setExampleEn("");
+        if (vocab.getExampleJp() == null)
+            vocab.setExampleJp("");
+        if (vocab.getUsersId() == null)
+            vocab.setUsersId("admin");
 
         vocab.setCreatedAt(LocalDateTime.now());
         vocab.setUpdatedAt(LocalDateTime.now());
@@ -64,22 +75,27 @@ public class VocabServiceImpl implements VocabService {
 
     /**
      * Uses an updating method to update one specified record.
-     * Only columns specified as not null in an argument are replaced into new values here.
+     * Only columns specified as not null in an argument are replaced into new
+     * values here.
      * In addition, Updated time is assigned here.
      */
     @Override
     public VocabEntity update(VocabEntity vocab) {
         VocabEntity newVocab = vocabRepository.findById(vocab.getId());
 
-        if (vocab.getSpelling() != null) newVocab.setSpelling(vocab.getSpelling());
-        if (vocab.getMeaning() != null) newVocab.setMeaning(vocab.getMeaning());
-        if (vocab.getExampleEn() != null) newVocab.setExampleEn(vocab.getExampleEn());
-        if (vocab.getExampleJp() != null) newVocab.setExampleJp(vocab.getExampleJp());
+        if (vocab.getSpelling() != null)
+            newVocab.setSpelling(vocab.getSpelling());
+        if (vocab.getMeaning() != null)
+            newVocab.setMeaning(vocab.getMeaning());
+        if (vocab.getExampleEn() != null)
+            newVocab.setExampleEn(vocab.getExampleEn());
+        if (vocab.getExampleJp() != null)
+            newVocab.setExampleJp(vocab.getExampleJp());
         newVocab.setUpdatedAt(LocalDateTime.now());
 
         vocabRepository.update(newVocab);
-        
+
         return newVocab;
     }
-    
+
 }
