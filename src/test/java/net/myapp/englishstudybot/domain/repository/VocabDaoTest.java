@@ -1,6 +1,7 @@
 package net.myapp.englishstudybot.domain.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -9,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,43 +34,45 @@ import net.myapp.englishstudybot.domain.model.VocabEntity;
  * VocabDaoTest is a test class for VocabDao.class
  * 
  * NOTE:
- * The test for findAll method is omitted because is had already been tested by using Postman
+ * The test for findAll method is omitted because is had already been tested by
+ * using Postman
  * with controller and service.
  */
 @SpringBootTest
 @Transactional
 @TestExecutionListeners({
-    DependencyInjectionTestExecutionListener.class,
-    DirtiesContextTestExecutionListener.class,
-    TransactionalTestExecutionListener.class,
-    DbUnitTestExecutionListener.class
+        DependencyInjectionTestExecutionListener.class,
+        DirtiesContextTestExecutionListener.class,
+        TransactionalTestExecutionListener.class,
+        DbUnitTestExecutionListener.class
 })
-@DbUnitConfiguration(
-    dataSetLoader = CsvDataSetLoader.class
-)
+@DbUnitConfiguration(dataSetLoader = CsvDataSetLoader.class)
 @DatabaseSetup("/db/data/")
 class VocabDaoTest {
 
-    private static final LocalDateTime testCurrentTime 
-    = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+    private static final LocalDateTime testCurrentTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+
+    private static final MockedStatic<LocalDateTime> mockedLocalDateTime = Mockito.mockStatic(LocalDateTime.class,
+            CALLS_REAL_METHODS);
 
     @Autowired
     private VocabDao vocabDao;
 
     @BeforeAll
-    static void setUpAll() {
-        MockedStatic<LocalDateTime> mock 
-        = Mockito.mockStatic(LocalDateTime.class, Mockito.CALLS_REAL_METHODS);
-        mock.when(LocalDateTime::now).thenReturn(testCurrentTime);
+    static void setUpOnce() {
+        mockedLocalDateTime.when(LocalDateTime::now).thenReturn(testCurrentTime);
+    }
+
+    @AfterAll
+    static void tearDownAll() {
+        mockedLocalDateTime.close();
     }
 
     @Test
     @DisplayName("すべての英単語のIDを取得")
     void findAllIds() {
-        List<Integer> expected
-         = Arrays.stream(
-                    IntStream.rangeClosed(1,10).toArray()
-            ).boxed().toList();
+        List<Integer> expected = Arrays.stream(
+                IntStream.rangeClosed(1, 10).toArray()).boxed().toList();
 
         List<Integer> actual = vocabDao.findAllIds();
 
@@ -78,25 +82,23 @@ class VocabDaoTest {
     @Test
     @DisplayName("指定IDの英単語データを1件取得")
     void findByIdOneVocab() {
-        //Arrange
+        // Arrange
         Integer vocabId = 5;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        VocabEntity vocabExpected
-        = new VocabEntity(
-            vocabId,
-            "refurbish",
-            "～を改装する、一新する",
-            "refurbish a hotel lounge",
-            "ホテルのラウンジを改装する",
-            "admin",
-            LocalDateTime.parse("2022-09-18 09:05:05", formatter),
-            LocalDateTime.parse("2022-09-09 10:01:01", formatter)
-        );
+        VocabEntity vocabExpected = new VocabEntity(
+                vocabId,
+                "refurbish",
+                "～を改装する、一新する",
+                "refurbish a hotel lounge",
+                "ホテルのラウンジを改装する",
+                "admin",
+                LocalDateTime.parse("2022-09-18 09:05:05", formatter),
+                LocalDateTime.parse("2022-09-09 10:01:01", formatter));
 
-        //Act
+        // Act
         VocabEntity vocabActual = vocabDao.findById(vocabId);
 
-        //Assert
+        // Assert
         assertThat(vocabActual).usingRecursiveComparison().isEqualTo(vocabExpected);
 
     }
@@ -104,13 +106,13 @@ class VocabDaoTest {
     @Test
     @DisplayName("存在しないIDの英単語データ取得でnull返却")
     void findByIdNoData() {
-        //Arrange
+        // Arrange
         Integer vocabId = 1000;
 
-        //Act
+        // Act
         VocabEntity vocabActual = vocabDao.findById(vocabId);
 
-        //Assert
+        // Assert
         assertThat(vocabActual).isNull();
 
     }
@@ -119,10 +121,10 @@ class VocabDaoTest {
     @DisplayName("ランダムIDの英単語データ取得")
     void findByRandom() {
 
-        //Arrange
+        // Arrange
         final int REPEAT_COUNT_MAX = 2;
 
-        //Act
+        // Act
         Integer lastVocabId;
         VocabEntity vocabActual = vocabDao.findRandom();
         int i = 0;
@@ -133,31 +135,30 @@ class VocabDaoTest {
         } while (lastVocabId == vocabActual.getId() || i < REPEAT_COUNT_MAX);
         VocabEntity vocabExpected = vocabDao.findById(vocabActual.getId());
 
-        //Assert 
-        // assert that the latest primary id is different from 
+        // Assert
+        // assert that the latest primary id is different from
         // the previous one and hence record is extracted randomly
         assertThat(lastVocabId != vocabActual.getId()).isTrue();
         // assert that vocabulary record is extracted as expected
         assertThat(vocabActual).usingRecursiveComparison().isEqualTo(vocabExpected);
 
     }
-    
+
     @Test
     @DisplayName("指定ID以外の英単語データを取得")
     void findSomeExceptForOne() {
-        //Arrange
+        // Arrange
         int findNum = 9;
         Integer vocabIdExcluded = 5;
 
-        //Act
+        // Act
         List<VocabEntity> vocabList = vocabDao.findSomeExceptForOne(findNum, vocabIdExcluded);
-        List<Integer> vocabIdUniqueList
-         = vocabList.stream().map(item -> item.getId()).distinct().toList();
+        List<Integer> vocabIdUniqueList = vocabList.stream().map(item -> item.getId()).distinct().toList();
 
         VocabEntity vocabActual = vocabList.get(0);
         VocabEntity vocabExpected = vocabDao.findById(vocabActual.getId());
 
-        //Assert
+        // Assert
         assertThat(vocabIdUniqueList.size() == findNum).isTrue();
         assertThat(vocabIdUniqueList.contains(vocabIdExcluded)).isFalse();
         assertThat(vocabActual).usingRecursiveComparison().isEqualTo(vocabExpected);
@@ -167,25 +168,23 @@ class VocabDaoTest {
     @Test
     @DisplayName("英単語データを1件新規登録")
     void addOneVocab() {
-        //Arrange
-        VocabEntity vocabExpected
-        = new VocabEntity(
-            null,
-            "apprentice",
-            "弟子、見習い",
-            "I’ll help you!! I’m a Holmes’ apprentice!!",
-            "ボクが助けてあげるよ！！ボクはホームズの弟子だからさ！！",
-            "testUserA",
-            testCurrentTime,
-            testCurrentTime
-        );
+        // Arrange
+        VocabEntity vocabExpected = new VocabEntity(
+                null,
+                "apprentice",
+                "弟子、見習い",
+                "I’ll help you!! I’m a Holmes’ apprentice!!",
+                "ボクが助けてあげるよ！！ボクはホームズの弟子だからさ！！",
+                "testUserA",
+                testCurrentTime,
+                testCurrentTime);
         Integer lastId = 10;
 
-        //Act
+        // Act
         VocabEntity vocabActual = vocabDao.add(vocabExpected);
         vocabExpected.setId(vocabActual.getId());
 
-        //Assert
+        // Assert
         assertThat(vocabActual).usingRecursiveComparison().isEqualTo(vocabExpected);
         assertThat(vocabActual.getId() > lastId).isTrue();
 
@@ -194,7 +193,7 @@ class VocabDaoTest {
     @Test
     @DisplayName("英単語データを更新")
     void updateOneVocabSpelling() {
-        //Arrange
+        // Arrange
         Integer vocabId = 7;
         String spelling = "test";
         String meaning = "テスト";
@@ -207,10 +206,10 @@ class VocabDaoTest {
         vocabExpected.setExampleJp(exampleJp);
         vocabExpected.setUpdatedAt(testCurrentTime);
 
-        //Act
+        // Act
         VocabEntity vocabActual = vocabDao.update(vocabExpected);
 
-        //Assert
+        // Assert
         assertThat(vocabActual).usingRecursiveComparison().isEqualTo(vocabExpected);
 
     }
@@ -218,15 +217,15 @@ class VocabDaoTest {
     @Test
     @DisplayName("英単語データを1件削除")
     void deleteOneVocab() {
-        //Arrange
+        // Arrange
         Integer vocabId = 1;
 
-        //Act
+        // Act
         VocabEntity vocabBeforeDelete = vocabDao.findById(vocabId);
         vocabDao.delete(vocabId);
         VocabEntity vocabActual = vocabDao.findById(vocabId);
 
-        //Assert
+        // Assert
         assertThat(vocabBeforeDelete).isNotNull();
         assertThat(vocabActual).isNull();
 

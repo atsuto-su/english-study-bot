@@ -9,6 +9,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,58 +34,59 @@ import net.myapp.englishstudybot.domain.model.quiz.QuizAnswerRatioDto;
 @SpringBootTest
 @Transactional
 @TestExecutionListeners({
-    DependencyInjectionTestExecutionListener.class,
-    DirtiesContextTestExecutionListener.class,
-    TransactionalTestExecutionListener.class,
-    DbUnitTestExecutionListener.class
+        DependencyInjectionTestExecutionListener.class,
+        DirtiesContextTestExecutionListener.class,
+        TransactionalTestExecutionListener.class,
+        DbUnitTestExecutionListener.class
 })
-@DbUnitConfiguration(
-    dataSetLoader = CsvDataSetLoader.class
-)
+@DbUnitConfiguration(dataSetLoader = CsvDataSetLoader.class)
 @DatabaseSetup("/db/data/")
 class QuizAggregationDaoTest {
 
-    private static final LocalDateTime testCurrentTime
-     = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+    private static final LocalDateTime testCurrentTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+
+    private static final MockedStatic<LocalDateTime> mockedLocalDateTime = Mockito.mockStatic(LocalDateTime.class,
+            Mockito.CALLS_REAL_METHODS);
 
     @Autowired
     private QuizAggregationDao quizAggregationDao;
 
     @BeforeAll
     static void setUpAll() {
-        MockedStatic<LocalDateTime> mock
-        = Mockito.mockStatic(LocalDateTime.class, Mockito.CALLS_REAL_METHODS);
-        mock.when(LocalDateTime::now).thenReturn(testCurrentTime);
+        mockedLocalDateTime.when(LocalDateTime::now).thenReturn(testCurrentTime);
+    }
+
+    @AfterAll
+    static void tearDownAll() {
+        mockedLocalDateTime.close();
     }
 
     @Test
     @DisplayName("指定IDのクイズ結果集計データを1件取得")
     void findByIdOneQuizAggregation() {
-        //Arrange
+        // Arrange
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         Integer vocabulariesId = 1;
         String usersId = "admin";
-        QuizAggregationEntity expected 
-        = new QuizAggregationEntity(
-            vocabulariesId, 
-            usersId, 
-            1, 
-            2, 
-            LocalDateTime.parse("2022-09-19 19:00:05",formatter), 
-            LocalDateTime.parse("2022-09-18 08:10:00",formatter), 
-            3, 
-            4, 
-            false, 
-            true,
-            false,
-            LocalDateTime.parse("2022-09-01 09:00:00",formatter), 
-            LocalDateTime.parse("2022-09-19 19:00:05",formatter)
-        );
+        QuizAggregationEntity expected = new QuizAggregationEntity(
+                vocabulariesId,
+                usersId,
+                1,
+                2,
+                LocalDateTime.parse("2022-09-19 19:00:05", formatter),
+                LocalDateTime.parse("2022-09-18 08:10:00", formatter),
+                3,
+                4,
+                false,
+                true,
+                false,
+                LocalDateTime.parse("2022-09-01 09:00:00", formatter),
+                LocalDateTime.parse("2022-09-19 19:00:05", formatter));
 
-        //Act
+        // Act
         QuizAggregationEntity actual = quizAggregationDao.findById(vocabulariesId, usersId);
 
-        //Assert
+        // Assert
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
 
     }
@@ -92,15 +94,16 @@ class QuizAggregationDaoTest {
     @Test
     @DisplayName("存在しないレコードのクイズ結果集計データを取得してnullを返却")
     void findByIdNoData() {
-        //Arrange
+        // Arrange
         Integer vocabulariesId = 1000;
         String usersId = "admin";
 
-        //Act
+        // Act
         QuizAggregationEntity actual = quizAggregationDao.findById(vocabulariesId, usersId);
 
-        //Assert
-        assertThat(actual).isNull();;
+        // Assert
+        assertThat(actual).isNull();
+        ;
 
     }
 
@@ -109,7 +112,7 @@ class QuizAggregationDaoTest {
     @DisplayName("指定ユーザーの英単語IDを全取得")
     void findAllVocabIdsByUser() {
         String userId = "testUserA2";
-        List<Integer> expected = Arrays.asList(new Integer[]{1,2,5});
+        List<Integer> expected = Arrays.asList(new Integer[] { 1, 2, 5 });
         List<Integer> actual = quizAggregationDao.findAllVocabIdsForOneUser(userId);
         assertThat(actual).isEqualTo(expected);
     }
@@ -131,8 +134,7 @@ class QuizAggregationDaoTest {
         Boolean isJpQuestionQuiz = false;
         Integer vocabIdExpected = 2;
 
-        Integer vocabIdActual
-         = quizAggregationDao.findLeastRecentGivenVocab(userId, isJpQuestionQuiz);
+        Integer vocabIdActual = quizAggregationDao.findLeastRecentGivenVocab(userId, isJpQuestionQuiz);
 
         assertThat(vocabIdActual).isEqualTo(vocabIdExpected);
     }
@@ -144,8 +146,7 @@ class QuizAggregationDaoTest {
         Boolean isJpQuestionQuiz = true;
         Integer vocabIdExpected = 6;
 
-        Integer vocabIdActual
-         = quizAggregationDao.findLeastRecentGivenVocab(userId, isJpQuestionQuiz);
+        Integer vocabIdActual = quizAggregationDao.findLeastRecentGivenVocab(userId, isJpQuestionQuiz);
 
         assertThat(vocabIdActual).isEqualTo(vocabIdExpected);
     }
@@ -157,8 +158,7 @@ class QuizAggregationDaoTest {
         Boolean isJpQuestionQuiz = true;
         Integer vocabIdExpected = 2;
 
-        Integer vocabIdActual
-         = quizAggregationDao.findLeastRecentGivenVocab(userId, isJpQuestionQuiz);
+        Integer vocabIdActual = quizAggregationDao.findLeastRecentGivenVocab(userId, isJpQuestionQuiz);
 
         assertThat(vocabIdActual).isEqualTo(vocabIdExpected);
     }
@@ -169,8 +169,7 @@ class QuizAggregationDaoTest {
         String userId = "testUserA3";
         Boolean isJpQuestionQuiz = false;
 
-        Integer vocabIdActual
-         = quizAggregationDao.findLeastRecentGivenVocab(userId, isJpQuestionQuiz);
+        Integer vocabIdActual = quizAggregationDao.findLeastRecentGivenVocab(userId, isJpQuestionQuiz);
 
         assertThat(vocabIdActual).isNull();
     }
@@ -181,8 +180,7 @@ class QuizAggregationDaoTest {
         String userId = "testUserA4";
         Boolean isJpQuestionQuiz = false;
 
-        Integer vocabIdActual
-         = quizAggregationDao.findLeastRecentGivenVocab(userId, isJpQuestionQuiz);
+        Integer vocabIdActual = quizAggregationDao.findLeastRecentGivenVocab(userId, isJpQuestionQuiz);
 
         assertThat(vocabIdActual).isNull();
     }
@@ -193,23 +191,20 @@ class QuizAggregationDaoTest {
     void extractOrderedByIncorrectionRatioEnQuiz() {
         String userId = "testUserA3";
         Boolean isJpQuestionQuiz = false;
-        List<QuizAnswerRatioDto> expected
-         = Arrays.asList(new QuizAnswerRatioDto[]{
-            new QuizAnswerRatioDto(
-                6, 
-                0.0 
-            ),
-            new QuizAnswerRatioDto(
-                5, 
-                10.0
-            ),
-            new QuizAnswerRatioDto(
-                9, 
-                20.0
-            )
-         });
+        List<QuizAnswerRatioDto> expected = Arrays.asList(new QuizAnswerRatioDto[] {
+                new QuizAnswerRatioDto(
+                        6,
+                        0.0),
+                new QuizAnswerRatioDto(
+                        5,
+                        10.0),
+                new QuizAnswerRatioDto(
+                        9,
+                        20.0)
+        });
 
-        List<QuizAnswerRatioDto> actual = quizAggregationDao.extractOrderedByIncorrectionRatio(userId, isJpQuestionQuiz);
+        List<QuizAnswerRatioDto> actual = quizAggregationDao.extractOrderedByIncorrectionRatio(userId,
+                isJpQuestionQuiz);
 
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
     }
@@ -219,23 +214,20 @@ class QuizAggregationDaoTest {
     void extractOrderedByIncorrectionRatioJpQuizWith0Division() {
         String userId = "testUserA3";
         Boolean isJpQuestionQuiz = true;
-        List<QuizAnswerRatioDto> expected
-         = Arrays.asList(new QuizAnswerRatioDto[]{
-            new QuizAnswerRatioDto(
-                5, 
-                0.0 
-            ),
-            new QuizAnswerRatioDto(
-                9, 
-                0.0
-            ),
-            new QuizAnswerRatioDto(
-                6, 
-                50.0
-            )
-         });
+        List<QuizAnswerRatioDto> expected = Arrays.asList(new QuizAnswerRatioDto[] {
+                new QuizAnswerRatioDto(
+                        5,
+                        0.0),
+                new QuizAnswerRatioDto(
+                        9,
+                        0.0),
+                new QuizAnswerRatioDto(
+                        6,
+                        50.0)
+        });
 
-        List<QuizAnswerRatioDto> actual = quizAggregationDao.extractOrderedByIncorrectionRatio(userId, isJpQuestionQuiz);
+        List<QuizAnswerRatioDto> actual = quizAggregationDao.extractOrderedByIncorrectionRatio(userId,
+                isJpQuestionQuiz);
 
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
     }
@@ -247,21 +239,21 @@ class QuizAggregationDaoTest {
         Boolean isJpQuestionQuiz = true;
         List<QuizAnswerRatioDto> expected = List.of();
 
-        List<QuizAnswerRatioDto> actual = quizAggregationDao.extractOrderedByIncorrectionRatio(userId, isJpQuestionQuiz);
+        List<QuizAnswerRatioDto> actual = quizAggregationDao.extractOrderedByIncorrectionRatio(userId,
+                isJpQuestionQuiz);
 
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
     }
- 
+
     /* Test for findLastIncorrectVocabs method */
     @Test
     @DisplayName("不正解データの英単語IDを取得（和訳）")
     void findLastIncorrectVocabsEnQuiz() {
         String userId = "testUserA3";
         Boolean isJpQuestionQuiz = false;
-        List<Integer> expected = Arrays.asList(new Integer[]{6,9});
- 
-        List<Integer> actual
-         = quizAggregationDao.findLastIncorrectVocabs(userId, isJpQuestionQuiz);
+        List<Integer> expected = Arrays.asList(new Integer[] { 6, 9 });
+
+        List<Integer> actual = quizAggregationDao.findLastIncorrectVocabs(userId, isJpQuestionQuiz);
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -271,10 +263,9 @@ class QuizAggregationDaoTest {
     void findLastIncorrectVocabsJpQuiz() {
         String userId = "testUserA3";
         Boolean isJpQuestionQuiz = true;
-        List<Integer> expected = Arrays.asList(new Integer[]{5,9});
- 
-        List<Integer> actual
-         = quizAggregationDao.findLastIncorrectVocabs(userId, isJpQuestionQuiz);
+        List<Integer> expected = Arrays.asList(new Integer[] { 5, 9 });
+
+        List<Integer> actual = quizAggregationDao.findLastIncorrectVocabs(userId, isJpQuestionQuiz);
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -285,23 +276,21 @@ class QuizAggregationDaoTest {
         String userId = "testUserA2";
         Boolean isJpQuestionQuiz = false;
         List<Integer> expected = List.of();
- 
-        List<Integer> actual
-         = quizAggregationDao.findLastIncorrectVocabs(userId, isJpQuestionQuiz);
+
+        List<Integer> actual = quizAggregationDao.findLastIncorrectVocabs(userId, isJpQuestionQuiz);
 
         assertThat(actual).isEqualTo(expected);
     }
-    
+
     @Test
     @DisplayName("不正解データの英単語IDを取得（対象ユーザーデータなし）")
     void findLastIncorrectVocabsNoUserData() {
         String userId = "testUserA4";
         Boolean isJpQuestionQuiz = false;
- 
+
         List<Integer> expected = List.of();
 
-        List<Integer> actual
-         = quizAggregationDao.findLastIncorrectVocabs(userId, isJpQuestionQuiz);
+        List<Integer> actual = quizAggregationDao.findLastIncorrectVocabs(userId, isJpQuestionQuiz);
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -310,61 +299,57 @@ class QuizAggregationDaoTest {
     @Test
     @DisplayName("クイズ結果集計データを1件新規登録")
     void addOneQuizAggregation() {
-        //Arrange
+        // Arrange
         Integer vocabulariesId = 5;
         String usersId = "testUserB";
-        QuizAggregationEntity expected 
-        = new QuizAggregationEntity(
-            vocabulariesId, 
-            usersId, 
-            0, 
-            0, 
-            null,
-            null,
-            0, 
-            0, 
-            false, 
-            false,
-            false,
-            testCurrentTime,
-            testCurrentTime
-        );
+        QuizAggregationEntity expected = new QuizAggregationEntity(
+                vocabulariesId,
+                usersId,
+                0,
+                0,
+                null,
+                null,
+                0,
+                0,
+                false,
+                false,
+                false,
+                testCurrentTime,
+                testCurrentTime);
 
-        //Act
+        // Act
         QuizAggregationEntity actual = quizAggregationDao.add(expected);
 
-        //Assert
+        // Assert
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
     }
 
     @Test
     @DisplayName("既存データと重複するクイズ結果集計データを登録して例外発生")
     void addExistingQuizAggregationThrowsException() {
-        //Arrange
+        // Arrange
         Integer vocabulariesId = 1;
         String usersId = "admin";
-        QuizAggregationEntity expected 
-        = new QuizAggregationEntity(
-            vocabulariesId, 
-            usersId, 
-            0, 
-            0, 
-            null,
-            null,
-            0, 
-            0, 
-            false, 
-            false,
-            false,
-            testCurrentTime,
-            testCurrentTime
-        );
+        QuizAggregationEntity expected = new QuizAggregationEntity(
+                vocabulariesId,
+                usersId,
+                0,
+                0,
+                null,
+                null,
+                0,
+                0,
+                false,
+                false,
+                false,
+                testCurrentTime,
+                testCurrentTime);
         String errorMsgExpected = "duplicate key value violates unique constraint";
 
-        //Act and Assert
-        assertThatThrownBy( () ->  quizAggregationDao.add(expected))
-        .isInstanceOf(DuplicateKeyException.class)
-        .hasMessageContaining(errorMsgExpected);
+        // Act and Assert
+        assertThatThrownBy(() -> quizAggregationDao.add(expected))
+                .isInstanceOf(DuplicateKeyException.class)
+                .hasMessageContaining(errorMsgExpected);
 
     }
 
@@ -372,7 +357,7 @@ class QuizAggregationDaoTest {
     @Test
     @DisplayName("和訳問題のデータ更新（最終出題回数+1して最終出題日時を現在時刻に更新）")
     void updateGivenQuizEnQuiz() {
-        //Arrange
+        // Arrange
         Integer vocabulariesId = 1;
         String usersId = "testUserA";
         Boolean isJpQuestionQuiz = false;
@@ -380,12 +365,11 @@ class QuizAggregationDaoTest {
         expected.setTotalCountQuestionEn(expected.getTotalCountQuestionEn() + 1);
         expected.setLastQuestionDatetimeEn(testCurrentTime);
         expected.setUpdatedAt(testCurrentTime);
- 
-        //Act
-        QuizAggregationEntity actual
-         = quizAggregationDao.updateGivenQuiz(vocabulariesId, usersId, isJpQuestionQuiz);
 
-        //Assert
+        // Act
+        QuizAggregationEntity actual = quizAggregationDao.updateGivenQuiz(vocabulariesId, usersId, isJpQuestionQuiz);
+
+        // Assert
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
 
     }
@@ -393,7 +377,7 @@ class QuizAggregationDaoTest {
     @Test
     @DisplayName("英訳問題のデータ更新（最終出題回数+1と最終出題日時を現在時刻に更新）")
     void updateGivenQuizJpQuiz() {
-        //Arrange
+        // Arrange
         Integer vocabulariesId = 1;
         String usersId = "testUserA";
         Boolean isJpQuestionQuiz = true;
@@ -401,12 +385,11 @@ class QuizAggregationDaoTest {
         expected.setTotalCountQuestionJp(expected.getTotalCountQuestionJp() + 1);
         expected.setLastQuestionDatetimeJp(testCurrentTime);
         expected.setUpdatedAt(testCurrentTime);
- 
-        //Act
-        QuizAggregationEntity actual
-         = quizAggregationDao.updateGivenQuiz(vocabulariesId, usersId, isJpQuestionQuiz);
 
-        //Assert
+        // Act
+        QuizAggregationEntity actual = quizAggregationDao.updateGivenQuiz(vocabulariesId, usersId, isJpQuestionQuiz);
+
+        // Assert
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
 
     }
@@ -415,7 +398,7 @@ class QuizAggregationDaoTest {
     @Test
     @DisplayName("和訳問題正答時のデータ更新（正答数+1と正誤結果True）")
     void updateCorrectCaseEnQuiz() {
-        //Arrange
+        // Arrange
         Integer vocabulariesId = 1;
         String usersId = "testUserA";
         Boolean isJpQuestionQuiz = false;
@@ -423,12 +406,11 @@ class QuizAggregationDaoTest {
         expected.setTotalCountCorrectEn(expected.getTotalCountCorrectEn() + 1);
         expected.setIsLastAnswerCorrectEn(true);
         expected.setUpdatedAt(testCurrentTime);
- 
-        //Act
-        QuizAggregationEntity actual
-         = quizAggregationDao.updateCorrectCase(vocabulariesId, usersId, isJpQuestionQuiz);
 
-        //Assert
+        // Act
+        QuizAggregationEntity actual = quizAggregationDao.updateCorrectCase(vocabulariesId, usersId, isJpQuestionQuiz);
+
+        // Assert
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
 
     }
@@ -436,7 +418,7 @@ class QuizAggregationDaoTest {
     @Test
     @DisplayName("英訳問題正答時のデータ更新（正答数+1と正誤結果True）")
     void updateCorrectCaseJpQuiz() {
-        //Arrange
+        // Arrange
         Integer vocabulariesId = 1;
         String usersId = "testUserA";
         Boolean isJpQuestionQuiz = true;
@@ -444,12 +426,11 @@ class QuizAggregationDaoTest {
         expected.setTotalCountCorrectJp(expected.getTotalCountCorrectJp() + 1);
         expected.setIsLastAnswerCorrectJp(true);
         expected.setUpdatedAt(testCurrentTime);
- 
-        //Act
-        QuizAggregationEntity actual
-         = quizAggregationDao.updateCorrectCase(vocabulariesId, usersId, isJpQuestionQuiz);
 
-        //Assert
+        // Act
+        QuizAggregationEntity actual = quizAggregationDao.updateCorrectCase(vocabulariesId, usersId, isJpQuestionQuiz);
+
+        // Assert
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
 
     }
@@ -458,39 +439,39 @@ class QuizAggregationDaoTest {
     @Test
     @DisplayName("和訳問題誤答時のデータ更新（正誤結果False")
     void updateIncorrectCaseEnQuiz() {
-        //Arrange
+        // Arrange
         Integer vocabulariesId = 2;
         String usersId = "admin";
         Boolean isJpQuestionQuiz = false;
         QuizAggregationEntity expected = quizAggregationDao.findById(vocabulariesId, usersId);
         expected.setIsLastAnswerCorrectEn(false);
         expected.setUpdatedAt(testCurrentTime);
- 
-        //Act
-        QuizAggregationEntity actual
-         = quizAggregationDao.updateIncorrectCase(vocabulariesId, usersId, isJpQuestionQuiz);
 
-        //Assert
+        // Act
+        QuizAggregationEntity actual = quizAggregationDao.updateIncorrectCase(vocabulariesId, usersId,
+                isJpQuestionQuiz);
+
+        // Assert
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
-    
+
     }
 
     @Test
     @DisplayName("英訳問題誤答時のデータ更新（正誤結果False")
     void updateIncorrectCaseJpQuiz() {
-        //Arrange
+        // Arrange
         Integer vocabulariesId = 2;
         String usersId = "admin";
         Boolean isJpQuestionQuiz = true;
         QuizAggregationEntity expected = quizAggregationDao.findById(vocabulariesId, usersId);
         expected.setIsLastAnswerCorrectJp(false);
         expected.setUpdatedAt(testCurrentTime);
- 
-        //Act
-        QuizAggregationEntity actual
-         = quizAggregationDao.updateIncorrectCase(vocabulariesId, usersId, isJpQuestionQuiz);
 
-        //Assert
+        // Act
+        QuizAggregationEntity actual = quizAggregationDao.updateIncorrectCase(vocabulariesId, usersId,
+                isJpQuestionQuiz);
+
+        // Assert
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
 
     }
@@ -499,20 +480,19 @@ class QuizAggregationDaoTest {
     @Test
     @DisplayName("クイズ結果集計データを1件削除")
     void deleteOneQuizAggregation() {
-        //Arrange
+        // Arrange
         Integer vocabulariesId = 1;
         String usersId = "admin";
 
-        //Act
+        // Act
         QuizAggregationEntity recordBeforeDelete = quizAggregationDao.findById(vocabulariesId, usersId);
         quizAggregationDao.delete(vocabulariesId, usersId);
         QuizAggregationEntity recordAfterDelete = quizAggregationDao.findById(vocabulariesId, usersId);
-        
-        //Assert
+
+        // Assert
         assertThat(recordBeforeDelete).isNotNull();
         assertThat(recordAfterDelete).isNull();
 
     }
-
 
 }

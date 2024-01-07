@@ -18,12 +18,12 @@ import net.myapp.englishstudybot.domain.model.UserEntity;
 
 @Slf4j
 @Repository
-public class UserDao implements UserRepository{
+public class UserDao implements UserRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    UserDao(JdbcTemplate jdbcTemplate){
+    UserDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -37,9 +37,9 @@ public class UserDao implements UserRepository{
 
         UserEntity user;
         String query = "SELECT * FROM users WHERE id = ?";
-        try{
-           Map<String, Object> extractedItem = jdbcTemplate.queryForMap(query, id);
-           user = new UserEntity(
+        try {
+            Map<String, Object> extractedItem = jdbcTemplate.queryForMap(query, id);
+            user = new UserEntity(
                     (String) extractedItem.get("id"),
                     (Boolean) extractedItem.get("is_self_word_only"),
                     (Boolean) extractedItem.get("is_example_quiz"),
@@ -50,8 +50,7 @@ public class UserDao implements UserRepository{
                     (String) extractedItem.get("last_quiz"),
                     (String) extractedItem.get("last_quiz_answer"),
                     ((Timestamp) extractedItem.get("created_at")).toLocalDateTime(),
-                    ((Timestamp) extractedItem.get("updated_at")).toLocalDateTime()
-                );
+                    ((Timestamp) extractedItem.get("updated_at")).toLocalDateTime());
         } catch (EmptyResultDataAccessException e) {
             user = null;
         }
@@ -73,7 +72,7 @@ public class UserDao implements UserRepository{
         user.setUpdatedAt(currentTime);
 
         SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate)
-                                        .withTableName("users");
+                .withTableName("users");
         SqlParameterSource param = new BeanPropertySqlParameterSource(user);
         insert.execute(param);
 
@@ -82,19 +81,20 @@ public class UserDao implements UserRepository{
     }
 
     /**
-     * Updates quiz_status column of one existing record by executing the following SQL:
+     * Updates quiz_status column of one existing record by executing the following
+     * SQL:
      * UDPATE users SET quiz_status = {specified value} WHERE id = {specified id};
      */
     @Override
-    public UserEntity updateUserStatus(String id, QuizStateName quizStatus){
+    public UserEntity updateUserStatus(String id, QuizStateName quizStatus) {
         log.info("START: UserDao#updateUserStatus");
 
         String query = """
-                        UPDATE users SET 
-                            quiz_status = ?,
-                            updated_at = ?
-                        WHERE id = ?
-                        """;
+                UPDATE users SET
+                    quiz_status = ?,
+                    updated_at = ?
+                WHERE id = ?
+                """;
         jdbcTemplate.update(query, quizStatus.getCode(), LocalDateTime.now(), id);
 
         log.info("END: UserDao#updateUserStatus");
@@ -102,27 +102,29 @@ public class UserDao implements UserRepository{
     }
 
     /**
-     * Updates one existing record related to quiz info. by executing the following SQL:
-     * UPDATE users SET {last_vocabularies_id, last_quiz_sentence, last_quiz_answer} WHERE id = {specified id};
+     * Updates one existing record related to quiz info. by executing the following
+     * SQL:
+     * UPDATE users SET {last_vocabularies_id, last_quiz_sentence, last_quiz_answer}
+     * WHERE id = {specified id};
      */
     @Override
-    public UserEntity updateLastQuizInfo(UserEntity user){
+    public UserEntity updateLastQuizInfo(UserEntity user) {
         log.info("START: UserDao#updateLastQuizInfo");
 
         String query = """
-                        UPDATE users SET
-                           last_vocabularies_id = ?,
-                           last_quiz = ?,
-                           last_quiz_answer = ?,
-                           updated_at = ? 
-                        WHERE id = ?
-                        """;
-        jdbcTemplate.update(query, 
-                            user.getLastVocabulariesId(),
-                            user.getLastQuizSentence(),
-                            user.getLastQuizAnswer(),
-                            LocalDateTime.now(),
-                            user.getId());
+                UPDATE users SET
+                   last_vocabularies_id = ?,
+                   last_quiz = ?,
+                   last_quiz_answer = ?,
+                   updated_at = ?
+                WHERE id = ?
+                """;
+        jdbcTemplate.update(query,
+                user.getLastVocabulariesId(),
+                user.getLastQuizSentence(),
+                user.getLastQuizAnswer(),
+                LocalDateTime.now(),
+                user.getId());
 
         log.info("END: UserDao#updateLastQuizInfo");
         return findById(user.getId());
@@ -133,7 +135,7 @@ public class UserDao implements UserRepository{
      * DELETE FROM users WHERE id = {specified id};
      */
     @Override
-    public void delete(String id){
+    public void delete(String id) {
         log.info("START: UserDao#delete");
 
         String query = "DELETE FROM users WHERE id = ?";
@@ -141,5 +143,5 @@ public class UserDao implements UserRepository{
 
         log.info("END: UserDao#delete");
     }
-    
+
 }
