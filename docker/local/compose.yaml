@@ -1,0 +1,63 @@
+services:
+  app:
+    image: eclipse-temurin:17-jdk-focal
+    platform: linux/arm64/v8
+    container_name: spring-app
+    # ローカルホスト以外からのアクセスを禁止するため、ホスト名を明示的に指定
+    ports:
+      - 127.0.0.1:${APP_PORT}:8080
+    environment:
+      - DB_HOST
+      - DB_PORT
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - LINE_TOKEN
+      - LINE_SECRET
+      - CORS_ALLOW_ORIGIN
+      - LOG_FOLDER
+      - TZ=Asia/Tokyo
+    networks:
+      - spring-postgres
+    volumes:
+      - type: bind
+        source: ../../
+        target: /app
+      # バインドマウントから除外するフィイル・フォルダ
+      - /app/.git/
+      - /app/.github/
+      - /app/.vscode/
+      - /app/docker/
+      - /dev/null:/app/.gitignore
+    depends_on:
+      - db 
+    working_dir: /app
+    command: "./mvnw spring-boot:run"
+    # コンテナの正常終了を抑止
+    tty: true
+
+  db:
+    image: postgres:14.5
+    platform: linux/arm64/v8
+    container_name: ${DB_HOST}
+    # 開発環境用ではホストから直接アクセスできるようポート解放
+    ports: 
+      - 127.0.0.1:${DB_PORT}:5432
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - spring-postgres
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - TZ=Asia/Tokyo
+    # appサービスからアクセスできるようにするために解放するdbサービスコンテナ内のポート
+    expose:
+      - 5432
+
+volumes:
+  db-data:
+
+networks:
+  spring-postgres:
