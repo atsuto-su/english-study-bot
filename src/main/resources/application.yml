@@ -20,7 +20,7 @@ spring.devtools:
 spring.messages.basename: messages/messages
 
 # Logs
-logging.file.path: logs
+logging.file.path: ${LOG_FOLDER}
 
 # const values
 cors.allow.origin: ${CORS_ALLOW_ORIGIN}
