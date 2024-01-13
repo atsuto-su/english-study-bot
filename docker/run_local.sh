@@ -1,4 +1,6 @@
 #! /bin/sh
+environment="local"
+
 cd `dirname $0`
 
-docker compose -f ./local/compose.yaml up -d
+docker compose -f ./$environment/compose.yaml up -d

@@ -1,9 +1,10 @@
+# ローカル開発用
 services:
   app:
-    image: eclipse-temurin:17-jdk-focal
+    image: eclipse-temurin:17-jdk-jammy
     platform: linux/arm64/v8
     container_name: spring-app
-    # ローカルホスト以外からのアクセスを禁止するため、ホスト名を明示的に指定
+    # ローカルホスト以外からのアクセスを禁止するため、localhostを明示的に指定
     ports:
       - 127.0.0.1:${APP_PORT}:8080
     environment:
