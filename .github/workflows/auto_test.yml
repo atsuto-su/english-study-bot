@@ -64,6 +64,9 @@ jobs:
           LOG_FOLDER=${{secrets.LOG_FOLDER}}
           CORS_ALLOW_ORIGIN=${{secrets.CORS_ALLOW_ORIGIN}}
           EOF
+      - name: Check if .env file exists
+        run: |
+          cat ./docker/test | head -n 1
       - name: Create docker containers and execute test
         run: |
-          docker compose -f ./compose.test.yaml up -d
+          docker compose -f ./docker/test/compose.test.yaml up -d
