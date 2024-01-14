@@ -17,3 +17,5 @@ RUN ./mvnw dependency:go-offline
 COPY src ./src
 
 CMD ["./mvnw", "test"]
+
+RUN echo 'test'
