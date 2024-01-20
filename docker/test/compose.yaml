@@ -1,10 +1,10 @@
 # GitHub Actionsでのテスト実行用
 services:
   app:
-    image: attomark/botapp-test:latest
-    # build:
-    #   context: ../../
-    #   dockerfile: ./docker/test/Dockerfile
+    # image: attomark/botapp-test:latest
+    build:
+      context: ../../
+      dockerfile: ./docker/test/Dockerfile
     container_name: spring-app-test
     ports:
       - 127.0.0.1:${APP_PORT}:8080
@@ -23,6 +23,7 @@ services:
       - spring-postgres
     depends_on:
       - db 
+    tty: true
  
   db:
     image: postgres:14.5
