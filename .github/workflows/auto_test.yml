@@ -19,6 +19,7 @@ jobs:
     environment: test
     defaults:
       run:
+        # runステップにしか適用されないので注意（usesには適用されない）
         working-directory: ./docker/test
     env:
       DOCKER_ENV_FILE: .env
@@ -39,13 +40,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Check working directory
-        run: |
-          pwd; ls; ls ../../
       - name: Docker image build and push
         uses: docker/build-push-action@v5
         with:
-          context: ../../
+          context: .
+          file: ./docker/test/Dockerfile
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/${{ vars.DOCKER_IMAGE_NAME }}:latest
           cache-from: type=local,src=/tmp/.buildx-cache
