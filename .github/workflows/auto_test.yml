@@ -78,8 +78,6 @@ jobs:
             echo "$DOCKER_ENV_FILE is empty"
             exit 1
           fi
-      # docker composeでなく docker-composeを使わなといけない。
-      # https://github.com/actions/runner-images/issues/5022#issuecomment-1030025608
       - name: Create docker containers
         run: |
           docker compose up -d
