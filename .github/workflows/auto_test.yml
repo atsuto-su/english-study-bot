@@ -46,7 +46,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ../../
-          file: ./Dockerfile
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/${{ vars.DOCKER_IMAGE_NAME }}:latest
           cache-from: type=local,src=/tmp/.buildx-cache
