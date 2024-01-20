@@ -67,9 +67,11 @@ jobs:
       - name: Check if .env file exists
         run: |
           cat ./docker/test/.env | head -n 1
+      # docker composeでなく docker-composeを使わなといけない。
+      # https://github.com/actions/runner-images/issues/5022#issuecomment-1030025608
       - name: Create docker containers and execute test
         run: |
-          docker compose -f ./docker/test/compose.yaml up -d
-      - name: Check app container logs
-        run: |
-          docker compose -f ./docker/test/compose.yaml logs --tail 10 app
+          docker-compose -f ./docker/test/compose.yaml up -d
+      # - name: Check app container logs
+      #   run: |
+      #     docker compose -f ./docker/test/compose.yaml logs --tail 10 app
