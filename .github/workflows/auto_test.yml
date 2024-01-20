@@ -17,6 +17,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
     environment: test
+    defaults:
+      run:
+        working-directory: ./docker/test
+    env:
+      DOCKER_ENV_FILE: .env
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -37,8 +42,8 @@ jobs:
       - name: Docker image build and push
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: ./docker/test/Dockerfile
+          context: ../../
+          file: ./Dockerfile
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/${{ vars.DOCKER_IMAGE_NAME }}:latest
           cache-from: type=local,src=/tmp/.buildx-cache
@@ -49,9 +54,8 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
       - name: Create env file for containers
         run: |
-          cd ./docker/test
-          touch .env
-          cat <<EOF > .env
+          touch $DOCKER_ENV_FILE
+          cat <<EOF > $DOCKER_ENV_FILE
           COMPOSE_PROJECT_NAME=${{vars.COMPOSE_PROJECT_NAME}}
           APP_PORT=${{secrets.APP_PORT}}
           DB_HOST=${{secrets.DB_HOST}}
@@ -66,19 +70,18 @@ jobs:
           EOF
       - name: Check if .env file exists
         run: |
-          FILE="./docker/test/.env"
-          if [ ! -f $FILE ]; then
-            echo ".env is not found"
+          if [ ! -f $DOCKER_ENV_FILE ]; then
+            echo "$DOCKER_ENV_FILE is not found"
             exit 1
-          elif [ ! -s $FILE ]; then
-            echo ".env is empty"
+          elif [ ! -s $DOCKER_ENV_FILE ]; then
+            echo "$DOCKER_ENV_FILE is empty"
             exit 1
           fi
       # docker composeでなく docker-composeを使わなといけない。
       # https://github.com/actions/runner-images/issues/5022#issuecomment-1030025608
       - name: Create docker containers
         run: |
-          docker compose -f ./docker/test/compose.yaml up -d
+          docker compose up -d
       - name: Execute maven test
         run: |
           docker compose exec -it app /bin/bash
