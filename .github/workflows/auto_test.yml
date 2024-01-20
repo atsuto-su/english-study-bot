@@ -67,7 +67,7 @@ jobs:
       - name: Check if .env file exists
         run: |
           FILE="./docker/test/.env"
-          if [ ! -f $FILE ]
+          if [ ! -f $FILE ]; then
             echo ".env is not found"
             exit 1
           elif [ ! -s $FILE ]; then
