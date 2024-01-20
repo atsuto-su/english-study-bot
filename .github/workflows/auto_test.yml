@@ -70,3 +70,4 @@ jobs:
       - name: Create docker containers and execute test
         run: |
           docker compose -f ./docker/test/compose.yaml up -d
+          docker compose -f ./docker/test/compose.yaml logs --tail 10 app
